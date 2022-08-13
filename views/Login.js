@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, TextInput, Dimensions } from "react-native";
+import { View, SafeAreaView, Text, StyleSheet, TextInput, Dimensions } from "react-native";
 import Css from "../utils/CSS";
+import Button from "../components/ui-kit/Button";
 
 const screenWidth = Dimensions.get('screen').width,
     screenHeight = Dimensions.get('screen').height;
@@ -9,11 +10,19 @@ export default class Login extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            email: null,
+            password: null
+        }
+    }
+
+    connexion = () => {
+        console.log(this.state.email, this.state.password)
     }
 
     render() {
         return(
-            <View style={styles.view}>
+            <SafeAreaView style={styles.view}>
                 <Text style={styles.title}>Connexion</Text>
                 <View style={styles.controls}>
                     <Text style={styles.label}>
@@ -22,6 +31,8 @@ export default class Login extends React.Component {
                     <TextInput
                         style={styles.input}
                         placeholder='Your email'
+                        keyboardType='email-address'
+                        onChangeText={(text) => this.setState({email: text})}
                     />
                 </View>
                 <View style={styles.controls}>
@@ -31,9 +42,16 @@ export default class Login extends React.Component {
                     <TextInput
                         style={styles.input}
                         placeholder='Your password'
+                        secureTextEntry={true}
+                        onChangeText={(text) => this.setState({password: text})}
                     />
                 </View>
-            </View>
+                <Button
+                    type='yellow'
+                    label='Login'
+                    process={() => this.connexion()}
+                />
+            </SafeAreaView>
         )
     }
 }
