@@ -1,10 +1,13 @@
 import React from "react";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Settings from "../../views/Settings";
-import Options from "../../views/Options";
-import { Image, View, StyleSheet } from "react-native";
-import Articles from "../../views/Articles";
-import Feeds from "../../views/Feeds";
+import Missions from "../../views/Missions";
+import Forms from "../../views/Forms";
+import { Image, View } from "react-native";
+import Utils from "../../views/Utils";
+import Css from '../../utils/CSS';
+import FormSvg from '../svg/Forms';
+import MissionsSvg from '../svg/Missions';
+import UtilsSvg from '../svg/Utils'
 
 const BottomTab = createBottomTabNavigator()
 
@@ -13,19 +16,20 @@ export default class Bottom extends React.Component {
     render() {
 
         return(
-            <View style={{ flex:1, backgroundColor: '#FCD833' }}>
+            <View style={{ flex:1, backgroundColor: Css().root.yellow }}>
 
                 <BottomTab.Navigator
                     screenOptions={{
                         headerStyle: {
-                            backgroundColor: '#FCD833',
+                            backgroundColor: Css().root.yellow,
                         },
-                        headerTintColor: '#273238',
+                        headerTintColor: Css().root.darkGrey,
                         headerTitleStyle: {
-                            fontWeight: 'bold',
+                            fontFamily: 'Lato-Black',
+                            fontSize: 24
                         },
                         headerTitleAlign: 'center',
-                        tabBarStyle: { backgroundColor: '#FCD833' },
+                        tabBarStyle: { backgroundColor: Css().root.yellow },
                         tabBarShowLabel: false,
                         animation: 'slide_from_right',
                         animationTypeForReplace: 'push'
@@ -33,42 +37,26 @@ export default class Bottom extends React.Component {
                 >
 
                     <BottomTab.Screen
-                        name="Settings"
-                        children={() => <Settings style={{padding: 10}}/>}
+                        name="Missions"
+                        children={() => <Missions style={{padding: 10}}/>}
                         options={{
-                            tabBarIcon: () => (<Image source={require('../../assets/cog.png')} style={{width: 20, height: 20}}/>),
+                            tabBarIcon: () => (<MissionsSvg/>),
                         }}
                     />
 
                     <BottomTab.Screen
-                        name="Articles"
-                        children={() => <Articles style={{padding: 10}}/>}
+                        name="Forms"
+                        children={() => <Forms style={{padding: 10}}/>}
                         options={{
-                            tabBarIcon: () => (<Image source={require('../../assets/tools.png')} style={{width: 20, height: 20}}/>),
+                            tabBarIcon: () => (<FormSvg/>),
                         }}
                     />
 
                     <BottomTab.Screen
-                        name="Feeds"
-                        children={() => <Feeds style={{padding: 10}}/>}
+                        name="Utils"
+                        children={() => <Utils style={{padding: 10}}/>}
                         options={{
-                            tabBarIcon: () => (<Image source={require('../../assets/bath.png')} style={{width: 20, height: 20}}/>),
-                        }}
-                    />
-
-                    <BottomTab.Screen
-                        name="Options"
-                        children={() => <Options style={{padding: 10}}/>}
-                        options={{
-                            tabBarIcon: () => (<Image source={require('../../assets/tools.png')} style={{width: 20, height: 20}}/>),
-                        }}
-                    />
-
-                    <BottomTab.Screen
-                        name="Options2"
-                        children={() => <Feeds style={{padding: 10}}/>}
-                        options={{
-                            tabBarIcon: () => (<Image source={require('../../assets/thermometer.png')} style={{width: 10, height: 20}}/>),
+                            tabBarIcon: () => (<UtilsSvg/>),
                         }}
                     />
 
@@ -78,7 +66,3 @@ export default class Bottom extends React.Component {
         )
     }
 }
-
-const style = StyleSheet.create({
-    label: { display: 'none' }
-});

@@ -8,7 +8,7 @@ export default class Button extends React.Component {
 
         super(props);
         this.state = {
-            style: 'initial'
+            mode: 'initial'
         }
     }
 
@@ -36,14 +36,14 @@ export default class Button extends React.Component {
 
         return(
             <Pressable
-                style={[this.type()[this.state.style], styles.button]}
+                style={[this.type()[this.state.mode], styles.button, this.props.style]}
                 onPressIn={() => {
                     this.props.process();
-                    this.setState({style: 'focused'})
+                    this.setState({mode: 'focused'})
                 }}
-                onPressOut={() => this.setState({style: 'initial'})}
+                onPressOut={() => this.setState({mode: 'initial'})}
             >
-                <Text style={[this.type()[this.state.style], styles.text]}>
+                <Text style={[this.type()[this.state.mode], styles.text]}>
                     {this.props.label}
                 </Text>
             </Pressable>
@@ -86,7 +86,8 @@ const styles = StyleSheet.create({
         fontSize: 20
     },
     text: {
-        fontWeight: 'bold',
+        fontFamily: 'Lato-Bold',
+        letterSpacing: 1,
         fontSize: 18
     }
 })

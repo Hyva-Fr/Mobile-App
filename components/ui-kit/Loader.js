@@ -117,7 +117,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     text: {
-        fontWeight: 'bold',
+        fontFamily: 'Lato-Bold',
+        letterSpacing: 1,
         fontSize: 18,
         marginLeft: 20
     }

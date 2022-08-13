@@ -49,11 +49,12 @@ const styles = StyleSheet.create({
         color: Css().root.darkGrey,
         textAlign: 'center',
         marginBottom: 40,
-        borderRadius: 10
+        borderRadius: 10,
+        fontFamily: 'Lato-Light'
     },
     warning: {
         color: Css().root.red,
-        fontWeight: 'bold',
-        fontSize: 18
+        fontSize: 18,
+        fontFamily: 'Lato-Bold'
     }
 })

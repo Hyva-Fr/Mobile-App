@@ -5,7 +5,7 @@ import DateHumanizer from '../utils/DateHumanizer';
 
 const call = 'http://api.eint-sandbox.fr?token=1234&'
 
-export default class Articles extends React.Component {
+export default class Forms extends React.Component {
 
     constructor(props) {
         super(props);

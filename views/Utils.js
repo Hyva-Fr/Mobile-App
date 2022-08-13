@@ -14,7 +14,7 @@ import XHR from "../utils/XHR";
 
 const call = 'https://api.deezer.com/search?q='
 
-export default class Feeds extends React.Component {
+export default class Utils extends React.Component {
 
     constructor(props) {
         super(props);
