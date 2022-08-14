@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import Bottom from "./components/navigations/Bottom";
 import { View, Image, StyleSheet, NativeModules, Platform, Text } from "react-native";
 import Account from "./components/svg/Account";
@@ -15,6 +15,7 @@ import Notifications from "./components/svg/Notifications";
 import User from "./views/User";
 import Notifs from "./views/Notifications";
 import Arrow from "./components/svg/Arrow";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const {StatusBarManager} = NativeModules;
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 20 : StatusBarManager.HEIGHT;
@@ -30,7 +31,9 @@ export default class App extends React.Component {
             user: null,
             fontLoaded: false,
             goToUser: false,
-            goToNotifs: false
+            goToNotifs: false,
+            lastStack: 'Missions',
+            headerIcon: null
         }
     }
 
@@ -69,11 +72,21 @@ export default class App extends React.Component {
         this.isOnlineChecker()
     }
 
-    goBack = () => {
+    goBack = (stack) => {
         this.setState({
             goToUser: false,
-            goToNotifs: false
+            goToNotifs: false,
+            lastStack: stack,
+            headerIcon: null
         })
+    }
+
+    getPreviousStack = () => {
+        return this.state.lastStack
+    }
+
+    setPreviousStack = (stack) => {
+        this.setState({lastStack: stack})
     }
 
     render() {
@@ -83,7 +96,17 @@ export default class App extends React.Component {
                 if (this.state.isOnline === true) {
                     if (this.state.user === null) {
                         return (
-                            <>
+                            <SafeAreaProvider
+                                style={styles.safe}
+                                initialMetrics={{
+                                    insets: {
+                                        top: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        left: 0
+                                    }
+                                }}
+                            >
                                 <View style={styles.view}>
                                     <Image
                                         style={styles.logo}
@@ -92,15 +115,17 @@ export default class App extends React.Component {
                                     <View style={styles.leftSide}>
                                         <Notifications
                                             online={this.setOnlineStt}
-                                            onPress={() => this.setState({goToUser: false, goToNotifs: true})}
+                                            onPress={() => this.setState({goToUser: false, goToNotifs: true, headerIcon: 'Notifications'})}
+                                            headerIcon={this.state.headerIcon}
                                         />
                                         <Account
-                                            style={{marginLeft: 10}}
+                                            style={{marginLeft: 20}}
                                             online={this.setOnlineStt}
-                                            onPress={() => this.setState({goToNotifs: false, goToUser: true})}
+                                            onPress={() => this.setState({goToNotifs: false, goToUser: true, headerIcon: 'Account'})}
+                                            headerIcon={this.state.headerIcon}
                                         />
                                         <Exit
-                                            style={{marginLeft: 10}}
+                                            style={{marginLeft: 20}}
                                             onPress={() => this.logout()}
                                         />
                                     </View>
@@ -109,7 +134,7 @@ export default class App extends React.Component {
                                     <>
                                         <View style={styles.fakeHeader}>
                                             <Text style={styles.fakeHeaderTitle}>My Account</Text>
-                                            <Arrow style={styles.arrow} onPress={() => this.goBack()}/>
+                                            <Arrow style={styles.arrow} onPress={() => this.goBack(this.state.lastStack)}/>
                                         </View>
                                         <User/>
                                     </>
@@ -118,14 +143,17 @@ export default class App extends React.Component {
                                     <>
                                         <View style={styles.fakeHeader}>
                                             <Text style={styles.fakeHeaderTitle}>Notifications</Text>
-                                            <Arrow style={styles.arrow} onPress={() => this.goBack()}/>
+                                            <Arrow style={styles.arrow} onPress={() => this.goBack(this.state.lastStack)}/>
                                         </View>
                                         <Notifs/>
                                     </>
                                 }
                                 {(this.state.goToUser === false && this.state.goToNotifs === false) &&
                                     <NavigationContainer>
-                                        <Bottom online={this.setOnlineStt}/>
+                                        <Bottom
+                                            online={this.setOnlineStt}
+                                            setPreviousStack={this.setPreviousStack}
+                                            getPreviousStack={this.getPreviousStack}/>
                                     </NavigationContainer>
                                 }
 
@@ -133,7 +161,7 @@ export default class App extends React.Component {
                                     <Loader/>
                                 }
                                 <StatusBar style="auto"/>
-                            </>
+                            </SafeAreaProvider>
                         );
                     } else {
                         return (
@@ -176,6 +204,9 @@ export default class App extends React.Component {
 }
 
 const styles = StyleSheet.create({
+    safe: {
+        flex: 1
+    },
     logo: {
         width: 80,
         height: 80,
