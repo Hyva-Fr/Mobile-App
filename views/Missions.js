@@ -10,6 +10,10 @@ export default class Missions extends React.Component {
         }
     }
 
+    componentDidMount() {
+
+    }
+
     render() {
 
         return(

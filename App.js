@@ -16,6 +16,8 @@ import User from "./views/User";
 import Notifs from "./views/Notifications";
 import Arrow from "./components/svg/Arrow";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { storeData, getData } from './utils/Storage';
+import XHR from "./utils/XHR";
 
 const {StatusBarManager} = NativeModules;
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 20 : StatusBarManager.HEIGHT;
@@ -27,7 +29,7 @@ export default class App extends React.Component {
         this.state = {
             isOnline: false,
             visible: false,
-            start: true,
+            start: false,
             user: null,
             fontLoaded: false,
             goToUser: false,
@@ -59,8 +61,20 @@ export default class App extends React.Component {
         });
     }
 
-    login = (email, password) => {
-        console.log(email, password)
+    login = (data, email, pwd) => {
+        this.setState({visible: true})
+        storeData('init',
+            JSON.stringify({'token': data.token, 'email': email, 'password': pwd, 'id': data.id}),
+            (json) => {
+            XHR('get', '/users/' + json.id, {'email': json.email, 'password': json.password}, (resp) => {
+                if (resp.message === 'ok') {
+                    this.setState({user: resp})
+                    setTimeout(() => {
+                        this.setState({visible: false})
+                    }, 2000)
+                }
+            }, json.token)
+        })
     }
 
     logout = () => {
@@ -70,6 +84,9 @@ export default class App extends React.Component {
     componentDidMount() {
         this.loadFonts()
         this.isOnlineChecker()
+        getData('init', (data) => {
+            this.setState({user: data})
+        })
     }
 
     goBack = (stack) => {
@@ -94,7 +111,7 @@ export default class App extends React.Component {
         if (this.state.fontsLoaded) {
             if (this.state.start === true) {
                 if (this.state.isOnline === true) {
-                    if (this.state.user === null) {
+                    if (this.state.user !== null) {
                         return (
                             <SafeAreaProvider
                                 style={styles.safe}

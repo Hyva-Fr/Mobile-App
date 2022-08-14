@@ -1,24 +1,38 @@
-export default function XHR(type, domain, data, callback) {
+import * as Device from 'expo-device';
 
+export default function XHR(method, uri, data, callback, token = null) {
+
+    data['device_name'] = JSON.stringify({'os': Device.osName, 'version': Device.osVersion, 'name': Device.deviceName});
     let xhr = new XMLHttpRequest(),
-        text = (type === 'deezer') ? data : new URLSearchParams(data).toString(),
-        url = domain + text
+        url = 'https://api-hyva.eint-sandbox.fr/api' + uri,
+        params = serialise(data);
 
-    xhr.open('GET', url, true);
-    xhr.onload = () => {
+    xhr.open(method.toUpperCase(), url, true);
+    xhr.onreadystatechange = () => {
 
-        let response = xhr.response
-        if (isJson(response)) {
-
-            let json = (type === 'deezer') ? JSON.parse(response).data : JSON.parse(response)
-            callback(json)
-
+        if (isJson(xhr.response)) {
+            callback(JSON.parse(xhr.response))
         } else {
-
-            console.log('Mauvais format de réception...')
+            callback(xhr.response)
         }
+
     }
-    xhr.send();
+
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    if (token) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + token)
+    }
+    xhr.send(params);
+
+}
+
+function serialise(obj) {
+    let serialised = '';
+    Object.keys(obj).forEach(function(key) {
+        serialised += encodeURIComponent(key).replace(/%20/g, '+') + '=' + encodeURIComponent(obj[key]).replace(/%20/g, '+') + '&';
+    });
+    return serialised.slice(0, -1);
 }
 
 function isJson(str) {

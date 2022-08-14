@@ -1,20 +1,29 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { Text, ScrollView, View, StyleSheet } from "react-native";
 
 export default class Notifications extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+
+        }
     }
 
     render() {
 
         return(
-            <View>
+            <ScrollView style={styles.view}>
                 <Text>
                     Notifications
                 </Text>
-            </View>
+            </ScrollView>
         )
     }
 }
+
+const styles = StyleSheet.create({
+    view: {
+        flex: 1
+    }
+})

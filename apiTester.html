@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="../assets/favicon.png">
+    <title>Test API</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Tahoma, Genova, sans-serif;
+        }
+        h1 {
+            font-size: 40px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h1>API Tester</h1>
+<script>
+    let token = null;
+
+    $(document).ready(function(){
+        initConnexion();
+    });
+
+    function ajax(url, data, type, callback) {
+
+        let headers = {'X-Requested-With': 'XMLHttpRequest'}
+        if (token !== null) {
+            headers['Authorization'] = 'Bearer ' + token;
+        }
+
+        $.ajax({
+            url: url,
+            type: type,
+            data: data,
+            headers: headers,
+            dataType: 'json',
+            success: function (data) {
+                console.log('method: ' + type.toUpperCase());
+                callback(data);
+            },
+            error: function (data){
+                console.log('method: OPTIONS');
+                callback(data.responseText);
+            }
+        });
+    }
+
+    function initConnexion() {
+
+        ajax(
+            'https://api-hyva.eint-sandbox.fr/api/authorization-request',
+            {'email': 'fred.geffray@gmail.com', 'password': 'Lespaul96!', 'device_name': 'Toto'},
+            'post',
+            function (data) {
+                token = data.token;
+                console.log(token);
+                getUsers();
+            }
+        );
+    }
+
+    function getUsers() {
+
+        ajax(
+            'https://api-hyva.eint-sandbox.fr/api/missions',
+            {'email': 'fred.geffray@gmail.com', 'password': 'Lespaul96!', 'device_name': 'Toto'},
+            'get',
+            function (data) {
+                console.log(data);
+            }
+        );
+    }
+</script>
+</body>
+</html>
