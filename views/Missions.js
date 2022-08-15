@@ -7,7 +7,7 @@ import Css from '../utils/CSS';
 import MissionSvg from "../components/svg/Missions";
 import FolderSvg from "../components/svg/Folder";
 import CloseSvg from "../components/svg/Close";
-import DateHumanizer from "../utils/DateHumanizer";
+import {dateHumanizer, getSqlDate} from "../utils/DateHumanizer";
 import * as Linking from 'expo-linking';
 import Pdf from "../components/svg/Pdf";
 import Excel from "../components/svg/Excel";
@@ -25,7 +25,8 @@ export default class Missions extends React.Component {
             missions: null,
             mission: null,
             init: null,
-            comment: null
+            comment: null,
+            comments: []
         }
     }
 
@@ -37,10 +38,17 @@ export default class Missions extends React.Component {
         })
     }
 
-    sendComment = () => {
+    sendComment = (mission_id) => {
         let comment = this.state.comment;
         if (this.state.comment && this.state.comment.trim() !== '') {
-            console.log(comment)
+            let json = {
+                'user_id': this.state.init.id,
+                'mission_id': mission_id,
+            },
+                date = getSqlDate();
+
+            json['created_at'] = dateHumanizer(date)
+            console.log(json)
         }
     }
 
@@ -148,7 +156,17 @@ export default class Missions extends React.Component {
                                     <View
                                         key={i}
                                     >
-                                        <Text style={styles.infos}>The {DateHumanizer(comment.created_at, 'date')} by {comment.user}</Text>
+                                        <Text style={styles.infos}>The {dateHumanizer(comment.created_at, 'date')} by {comment.user}</Text>
+                                        <Text style={styles.comment}>{comment.comment}</Text>
+                                    </View>
+                                )
+                            })}
+                            {this.state.comments.map((comment, i) => {
+                                return(
+                                    <View
+                                        key={i}
+                                    >
+                                        <Text style={styles.infos}>The {dateHumanizer(comment.created_at, 'date')} by {comment.user}</Text>
                                         <Text style={styles.comment}>{comment.comment}</Text>
                                     </View>
                                 )
@@ -165,7 +183,7 @@ export default class Missions extends React.Component {
                                     type='yellow'
                                     label='Send comment'
                                     autoCorrect={false}
-                                    process={() => this.sendComment()}
+                                    process={() => this.sendComment(mission.id)}
                                 />
                             </View>
                         </View>
@@ -188,7 +206,7 @@ export default class Missions extends React.Component {
                         <ScrollView style={styles.view} keyboardShouldPersistTaps='always'>
                             {missions.map((mission, i) =>
                                 <View style={styles.master} key={i}>
-                                    <Text style={styles.infos}>The {DateHumanizer(mission.created_at, 'date')}</Text>
+                                    <Text style={styles.infos}>The {dateHumanizer(mission.created_at, 'date')}</Text>
                                     <View style={styles.container}>
                                         <View style={styles.titleContainer}>
                                             <MissionSvg style={styles.svg} fill={Css().root.yellow}/>
@@ -360,18 +378,29 @@ const styles = StyleSheet.create({
         marginLeft: 5
     },
     docList: {
-        marginTop: 20,
-        marginBottom: 20,
+        marginTop: 10,
+        marginBottom: 10,
+        justifyContent: 'center',
         alignItems: 'center',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        paddingTop: 10,
+        paddingBottom: 10,
+        paddingLeft: 10,
+        paddingRight: 10,
+        borderRadius: 6,
+        borderStyle: 'solid',
+        borderWidth: 1,
+        borderColor: Css().root.thinGrey
     },
     noDocList: {
-        marginTop: 20,
-        marginBottom: 20,
+        marginTop: 10,
+        marginBottom: 10,
         alignItems: 'center',
         flexDirection: 'row',
         fontFamily: 'Lato-Light',
-        color: Css().root.red
+        color: Css().root.red,
+        width: '100%',
+        textAlign: 'center',
     },
     commentsContainer: {
         marginBottom: 20

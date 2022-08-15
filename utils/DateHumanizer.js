@@ -1,4 +1,4 @@
-export default function DateHumanizer(date, type = '') {
+export function dateHumanizer(date, type = '') {
 
     let split = date.split('T'),
         calendar = split[0].split('-'),
@@ -26,4 +26,16 @@ export default function DateHumanizer(date, type = '') {
         return hours + ':' + minutes;
     }
     return day + ' of ' + months[month - 1] + ' - ' + year + ' at ' + hours + ':' + minutes;
+}
+
+export function getSqlDate() {
+
+    let d = new Date(),
+        year = d.getFullYear(),
+        month = ('0' + (d.getMonth() + 1)).slice(2),
+        date = ('0' + (d.getDate()) + 1).slice(2),
+        hour = ('0' + (d.getHours()) + 1).slice(2),
+        minutes = ('0' + (d.getMinutes()) + 1).slice(2);
+
+    return year + '-' + month + '-' + date + 'T' + hour + ':' + minutes;
 }
