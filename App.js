@@ -51,6 +51,8 @@ export default class App extends React.Component {
             'Lato-Bold': require('./assets/fonts/Lato-Bold.ttf'),
             'Lato-Light': require('./assets/fonts/Lato-Light.ttf'),
             'Lato-Black': require('./assets/fonts/Lato-Black.ttf'),
+            'Lato-Italic': require('./assets/fonts/Lato-Italic.ttf'),
+            'Lato-LightItalic': require('./assets/fonts/Lato-LightItalic.ttf'),
         });
         this.setState({ fontsLoaded: true });
     }

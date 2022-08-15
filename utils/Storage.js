@@ -5,7 +5,7 @@ export const storeData = async (key, value, callback = null) => {
         if (typeof value === 'object') {
             value = JSON.stringify(value)
         }
-        await AsyncStorage.setItem('key', value)
+        await AsyncStorage.setItem(key, value)
         if (callback) {
             let resp = (isJson(value)) ? JSON.parse(value) : value;
             callback(resp)
@@ -17,7 +17,7 @@ export const storeData = async (key, value, callback = null) => {
 
 export const getData = async (key, callback = null) => {
     try {
-        const value = await AsyncStorage.getItem('@storage_Key')
+        const value = await AsyncStorage.getItem(key)
         if(value !== null) {
             if (callback) {
                 let resp = (isJson(value)) ? JSON.parse(value) : value;
