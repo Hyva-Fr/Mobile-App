@@ -66,7 +66,7 @@ export default class App extends React.Component {
     login = (data, email, pwd) => {
         this.setState({visible: true})
         storeData('init',
-            JSON.stringify({'token': data.token, 'email': email, 'password': pwd, 'id': data.id, 'name': data.name}),
+            JSON.stringify({'token': data.token, 'email': email, 'password': pwd, 'id': data.id, 'name': data.name, 'notifications': data.notifications}),
             (json) => {
             XHR('get', '/users/' + json.id, {'email': json.email, 'password': json.password}, (resp) => {
                 if (resp.message === 'ok') {
