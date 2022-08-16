@@ -32,10 +32,10 @@ export function getSqlDate() {
 
     let d = new Date(),
         year = d.getFullYear(),
-        month = ('0' + (d.getMonth() + 1)).slice(2),
-        date = ('0' + (d.getDate()) + 1).slice(2),
-        hour = ('0' + (d.getHours()) + 1).slice(2),
-        minutes = ('0' + (d.getMinutes()) + 1).slice(2);
+        month = ('0' + (d.getMonth() + 1)).slice(-2),
+        date = ('0' + d.getDate()).slice(-2),
+        hour = ('0' + d.getHours()).slice(-2),
+        minutes = ('0' + d.getMinutes()).slice(-2);
 
     return year + '-' + month + '-' + date + 'T' + hour + ':' + minutes;
 }

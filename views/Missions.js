@@ -39,16 +39,24 @@ export default class Missions extends React.Component {
     }
 
     sendComment = (mission_id) => {
-        let comment = this.state.comment;
-        if (this.state.comment && this.state.comment.trim() !== '') {
+        let comment = this.state.comment,
+            comments = this.state.comments;
+        if (comment && comment.trim() !== '') {
+            this.setState({'comment': null})
             let json = {
                 'user_id': this.state.init.id,
                 'mission_id': mission_id,
-            },
-                date = getSqlDate();
+                'comment': comment,
+            };
 
-            json['created_at'] = dateHumanizer(date)
-            console.log(json)
+            let update = json;
+            update['created_at'] = getSqlDate()
+            update['user'] = this.state.init.name
+            comments.push(update)
+
+            XHR('post', '/comments', json, (data) => {
+                this.setState({'comments': comments})
+            }, this.state.init.token)
         }
     }
 
@@ -117,7 +125,11 @@ export default class Missions extends React.Component {
                         <MissionSvg style={styles.svg} fill={Css().root.yellow}/>
                         <Text style={styles.title}>{mission.serial}</Text>
                     </View>
-                    <ScrollView style={styles.modalScroll}>
+                    <ScrollView
+                        style={styles.modalScroll}
+                        keyboardShouldPersistTaps='always'
+                        keyboardDismissMode="on-drag"
+                    >
                         <View style={styles.sections}>
                             <Text style={styles.sectionTitle}>Customer information</Text>
                             <Text style={styles.societyName}>{mission.society.name}</Text>
@@ -175,6 +187,7 @@ export default class Missions extends React.Component {
                                 <TextInput
                                     multiline
                                     style={styles.textarea}
+                                    defaultValue={this.state.comment}
                                     onChangeText={text => this.setState({comment: text})}
                                     placeholder="Add your comment"
                                 />
@@ -203,7 +216,9 @@ export default class Missions extends React.Component {
                         {this.state.mission &&
                             this.missionModal()
                         }
-                        <ScrollView style={styles.view} keyboardShouldPersistTaps='always'>
+                        <ScrollView
+                            style={styles.view}
+                        >
                             {missions.map((mission, i) =>
                                 <View style={styles.master} key={i}>
                                     <Text style={styles.infos}>The {dateHumanizer(mission.created_at, 'date')}</Text>
