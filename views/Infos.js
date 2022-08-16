@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, ScrollView, View, StyleSheet } from "react-native";
 
-export default class Utils extends React.Component {
+export default class Infos extends React.Component {
 
     constructor(props) {
         super(props);
@@ -15,7 +15,7 @@ export default class Utils extends React.Component {
         return(
             <ScrollView style={styles.view}>
                 <Text>
-                    Utils
+                    Infos
                 </Text>
             </ScrollView>
         )

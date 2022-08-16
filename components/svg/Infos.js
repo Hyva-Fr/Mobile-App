@@ -2,9 +2,9 @@ import * as React from "react"
 import Svg, { Path } from "react-native-svg"
 import Css from '../../utils/CSS'
 
-function Utils(props) {
+function Infos(props) {
 
-    const active = props.active !== 'Utils' ? Css().root.darkGrey : Css().root.red
+    const active = props.active !== 'Infos' ? Css().root.darkGrey : Css().root.red
     const fill = (props.fill) ? props.fill : active
 
     return (
@@ -20,4 +20,4 @@ function Utils(props) {
     )
 }
 
-export default Utils
+export default Infos

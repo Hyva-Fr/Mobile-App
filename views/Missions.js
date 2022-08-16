@@ -25,8 +25,7 @@ export default class Missions extends React.Component {
             missions: null,
             mission: null,
             init: null,
-            comment: null,
-            comments: []
+            comment: null
         }
     }
 
@@ -52,10 +51,18 @@ export default class Missions extends React.Component {
             let update = json;
             update['created_at'] = getSqlDate()
             update['user'] = this.state.init.name
-            comments.push(update)
+            let missions = this.state.missions,
+                final = []
+            for (let i = 0; i < missions.length; i++) {
+                let mission = missions[i]
+                if (mission.id === mission_id) {
+                    mission.comments.push(update)
+                }
+                final.push(mission)
+            }
 
             XHR('post', '/comments', json, (data) => {
-                this.setState({'comments': comments})
+                this.setState({'missions': final})
             }, this.state.init.token)
         }
     }
@@ -119,7 +126,7 @@ export default class Missions extends React.Component {
                     <CloseSvg
                         style={styles.close}
                         fill={Css().root.yellow}
-                        onPress={() => this.setState({mission: null})}
+                        onPress={() => this.setState({mission: null, comment: null})}
                     />
                     <View style={styles.modalTitleContainer}>
                         <MissionSvg style={styles.svg} fill={Css().root.yellow}/>
@@ -164,16 +171,6 @@ export default class Missions extends React.Component {
                         <View style={[styles.sections, styles.notFirstSection]}>
                             <Text style={[styles.sectionTitle, styles.commentsContainer]}>Comments</Text>
                             {mission.comments.map((comment, i) => {
-                                return(
-                                    <View
-                                        key={i}
-                                    >
-                                        <Text style={styles.infos}>The {dateHumanizer(comment.created_at, 'date')} by {comment.user}</Text>
-                                        <Text style={styles.comment}>{comment.comment}</Text>
-                                    </View>
-                                )
-                            })}
-                            {this.state.comments.map((comment, i) => {
                                 return(
                                     <View
                                         key={i}

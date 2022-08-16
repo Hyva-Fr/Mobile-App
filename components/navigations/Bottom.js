@@ -3,11 +3,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Missions from "../../views/Missions";
 import Forms from "../../views/Forms";
 import { SafeAreaView } from "react-native";
-import Utils from "../../views/Utils";
+import Infos from "../../views/Infos";
 import Css from '../../utils/CSS';
 import FormSvg from '../svg/Forms';
 import MissionsSvg from '../svg/Missions';
-import UtilsSvg from '../svg/Utils'
+import InfosSvg from '../svg/Infos'
 
 const BottomTab = createBottomTabNavigator()
 
@@ -76,10 +76,10 @@ export default class Bottom extends React.Component {
                     />
 
                     <BottomTab.Screen
-                        name="Utils"
-                        children={() => <Utils style={{padding: 10}}/>}
+                        name="Infos"
+                        children={() => <Infos style={{padding: 10}}/>}
                         options={{
-                            tabBarIcon: () => (<UtilsSvg active={this.state.getPreviousStack()}/>),
+                            tabBarIcon: () => (<InfosSvg active={this.state.getPreviousStack()}/>),
                         }}
                         listeners={({ navigation, route }) => ({
                             tabPress: e => {
