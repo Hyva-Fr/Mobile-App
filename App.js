@@ -18,6 +18,7 @@ import Arrow from "./components/svg/Arrow";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { storeData, getData, removeData } from './utils/Storage';
 import XHR from "./utils/XHR";
+import RNRestart from 'react-native-restart';
 
 const {StatusBarManager} = NativeModules;
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 20 : StatusBarManager.HEIGHT;
@@ -90,8 +91,6 @@ export default class App extends React.Component {
         this.isOnlineChecker()
         getData('init', (data) => {
             this.setState({user: data})
-            this.notifier()
-            this.notificationControl()
         })
         getData('notifs', (data) => {
             this.setState({notifsSettings: data})
@@ -135,7 +134,9 @@ export default class App extends React.Component {
 
     notificationControl = () => {
         this.notifInterval = setInterval(() => {
-            this.notifier()
+            if (this.state.user !== null) {
+                this.notifier()
+            }
         }, 60000)
     }
 
@@ -160,12 +161,20 @@ export default class App extends React.Component {
         return null;
     }
 
+    logout = () => {
+        removeData('init', () => {
+            this.setState({user: null})
+        })
+    }
+
     render() {
 
         if (this.state.fontsLoaded) {
             if (this.state.start === true) {
                 if (this.state.isOnline === true) {
                     if (this.state.user !== null) {
+                        this.notifier()
+                        this.notificationControl()
                         return (
                             <SafeAreaProvider
                                 style={styles.safe}
@@ -203,11 +212,7 @@ export default class App extends React.Component {
                                         />
                                         <Exit
                                             style={{marginLeft: 20}}
-                                            onPress={() => {
-                                                removeData('init', () => {
-                                                    this.setState({user: null})
-                                                })
-                                            }}
+                                            onPress={() => this.logout()}
                                         />
                                     </View>
                                 </View>
@@ -217,7 +222,7 @@ export default class App extends React.Component {
                                             <Text style={styles.fakeHeaderTitle}>My Account</Text>
                                             <Arrow style={styles.arrow} onPress={() => this.goBack(this.state.lastStack)}/>
                                         </View>
-                                        <User/>
+                                        <User logout={this.logout} user={this.state.user}/>
                                     </>
                                 }
                                 {(this.state.goToUser === false) &&

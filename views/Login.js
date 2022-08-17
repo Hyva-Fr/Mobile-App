@@ -7,8 +7,7 @@ import EyeOpen from "../components/svg/EyeOpen";
 import { emailValidator } from "../utils/Validators";
 import XHR from "../utils/XHR";
 
-const screenWidth = Dimensions.get('screen').width,
-    screenHeight = Dimensions.get('screen').height;
+const screenWidth = Dimensions.get('screen').width
 
 export default class Login extends React.Component {
 

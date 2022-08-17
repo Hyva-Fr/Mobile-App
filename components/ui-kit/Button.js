@@ -77,17 +77,16 @@ const styles = StyleSheet.create({
         color: Css().root.red
     },
     button: {
-        paddingTop: 20,
-        paddingBottom: 20,
-        paddingLeft: 50,
-        paddingRight: 50,
+        paddingTop: 10,
+        paddingBottom: 10,
+        paddingLeft: 30,
+        paddingRight: 30,
         borderRadius: 2000,
-        fontWeight: 'bold',
-        fontSize: 20
     },
     text: {
         fontFamily: 'Lato-Bold',
-        letterSpacing: 1,
-        fontSize: 18
+        letterSpacing: 0.5,
+        fontSize: 16,
+        textAlign: 'center'
     }
 })

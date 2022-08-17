@@ -66,7 +66,7 @@
 
         ajax(
             'https://api-hyva.eint-sandbox.fr/api/authorization-request',
-            {'email': 'fred.geffray@gmail.com', 'password': 'Lespaul96!', 'device_name': 'Toto'},
+            {'email': 'fred.geffray@gmail.com', 'password': 'Lespaul96!', 'device_name': JSON.stringify({'os': 'Windows', 'version': 10, 'name': 'PC de Fred'})},
             'post',
             function (data) {
                 token = data.token;
@@ -79,9 +79,9 @@
     function getUsers() {
 
         ajax(
-            'https://api-hyva.eint-sandbox.fr/api/users',
-            {'email': 'fred.geffray@gmail.com', 'password': 'Lespaul96!', 'device_name': 'Toto'},
-            'get',
+            'https://api-hyva.eint-sandbox.fr/api/profile/get-avatar/1',
+            {'email': 'fred.geffray@gmail.com', 'password': 'Lespaul96!', 'device_name': JSON.stringify({'os': 'Windows', 'version': 10, 'name': 'PC de Fred'})},
+            'post',
             function (data) {
                 console.log(data);
             }
