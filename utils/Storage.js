@@ -33,6 +33,17 @@ export const getData = async (key, callback = null) => {
     }
 }
 
+export const removeData = async (key, callback = null) => {
+    try {
+        await AsyncStorage.removeItem(key)
+        if (callback) {
+            callback()
+        }
+    } catch(e) {
+        console.log(e)
+    }
+}
+
 function isJson(str) {
 
     try {

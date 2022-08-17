@@ -25,7 +25,9 @@ export default class Missions extends React.Component {
             missions: null,
             mission: null,
             init: null,
-            comment: null
+            comment: null,
+            setNotificationsContent: props.notifs,
+            missionDoted: props.missionDoted
         }
     }
 
@@ -221,12 +223,16 @@ export default class Missions extends React.Component {
                                     <Text style={styles.infos}>The {dateHumanizer(mission.created_at, 'date')}</Text>
                                     <View style={styles.container}>
                                         <View style={styles.titleContainer}>
+                                            {this.state.missionDoted(mission.id)}
                                             <MissionSvg style={styles.svg} fill={Css().root.yellow}/>
                                             <Text style={styles.title}>{mission.serial}</Text>
                                         </View>
                                         <FolderSvg
                                             fill={Css().root.darkGrey}
-                                            onPress={() => this.setState({mission: mission})}
+                                            onPress={() => {
+                                                this.state.setNotificationsContent(mission.id)
+                                                this.setState({mission: mission})
+                                            }}
                                         />
                                     </View>
                                 </View>

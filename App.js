@@ -13,10 +13,10 @@ import Login from "./views/Login";
 import * as Font from 'expo-font';
 import Notifications from "./components/svg/Notifications";
 import User from "./views/User";
-import Notifs from "./views/Notifications";
+import {notifs} from "./views/Notifs";
 import Arrow from "./components/svg/Arrow";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { storeData, getData } from './utils/Storage';
+import { storeData, getData, removeData } from './utils/Storage';
 import XHR from "./utils/XHR";
 
 const {StatusBarManager} = NativeModules;
@@ -26,6 +26,7 @@ export default class App extends React.Component {
 
     constructor(props) {
         super(props);
+        this.notifInterval = null
         this.state = {
             isOnline: false,
             visible: false,
@@ -33,9 +34,14 @@ export default class App extends React.Component {
             user: null,
             fontLoaded: false,
             goToUser: false,
-            goToNotifs: false,
             lastStack: 'Missions',
-            headerIcon: null
+            headerIcon: null,
+            notifications: [],
+            notifsSettings: {
+                sound: true,
+                alert: true,
+                badge: true
+            }
         }
     }
 
@@ -79,16 +85,21 @@ export default class App extends React.Component {
         })
     }
 
-    logout = () => {
-        console.log('logout')
-    }
-
     componentDidMount() {
         this.loadFonts()
         this.isOnlineChecker()
         getData('init', (data) => {
             this.setState({user: data})
+            this.notifier()
+            this.notificationControl()
         })
+        getData('notifs', (data) => {
+            this.setState({notifsSettings: data})
+        })
+    }
+
+    componentWillUnmount(){
+        if(this.notifInterval) clearInterval(this.notifInterval)
     }
 
     goBack = (stack) => {
@@ -106,6 +117,47 @@ export default class App extends React.Component {
 
     setPreviousStack = (stack) => {
         this.setState({lastStack: stack})
+    }
+
+    setNotificationsContent = (id) => {
+
+        let notifs = this.state.notifications,
+            refresh = [];
+        for (let i = 0; i < notifs.length; i++) {
+            if (id !== parseInt(notifs[i].mission_id)) {
+                refresh.push(notifs[i]);
+            }
+        }
+        XHR('post', '/delete-notification', {'user_id': this.state.user.id, 'mission_id': id}, () => {
+            this.setState({notifications: refresh})
+        }, this.state.user.token)
+    }
+
+    notificationControl = () => {
+        this.notifInterval = setInterval(() => {
+            this.notifier()
+        }, 60000)
+    }
+
+    notifier = () => {
+        if (this.state.isOnline === true) {
+            XHR('get', '/notifications', {}, (json) => {
+                if (json.data && json.data > this.state.notifications) {
+                    this.setState({notifications: json.data})
+                    notifs(json.data, this.state.notifsSettings)
+                }
+            }, this.state.user.token)
+        }
+    }
+
+    missionDoted = (id) => {
+        let notifs = this.state.notifications
+        for (let i = 0; i < notifs.length; i++) {
+            if (id === parseInt(notifs[i].mission_id)) {
+                return (<Text style={styles.missionDoted}/>)
+            }
+        }
+        return null;
     }
 
     render() {
@@ -132,11 +184,17 @@ export default class App extends React.Component {
                                         source={require('./assets/hyva.png')}
                                     />
                                     <View style={styles.leftSide}>
-                                        <Notifications
-                                            online={this.setOnlineStt}
-                                            onPress={() => this.setState({goToUser: false, goToNotifs: true, headerIcon: 'Notifications'})}
-                                            headerIcon={this.state.headerIcon}
-                                        />
+                                        {(this.state.notifications.length > 0)
+                                            ? <View>
+                                                <Notifications
+                                                    headerIcon={this.state.headerIcon}
+                                                />
+                                                <View style={styles.notifDot}/>
+                                            </View>
+                                            : <Notifications
+                                                headerIcon={this.state.headerIcon}
+                                            />
+                                        }
                                         <Account
                                             style={{marginLeft: 20}}
                                             online={this.setOnlineStt}
@@ -145,7 +203,11 @@ export default class App extends React.Component {
                                         />
                                         <Exit
                                             style={{marginLeft: 20}}
-                                            onPress={() => this.logout()}
+                                            onPress={() => {
+                                                removeData('init', () => {
+                                                    this.setState({user: null})
+                                                })
+                                            }}
                                         />
                                     </View>
                                 </View>
@@ -158,19 +220,12 @@ export default class App extends React.Component {
                                         <User/>
                                     </>
                                 }
-                                {this.state.goToNotifs === true &&
-                                    <>
-                                        <View style={styles.fakeHeader}>
-                                            <Text style={styles.fakeHeaderTitle}>Notifications</Text>
-                                            <Arrow style={styles.arrow} onPress={() => this.goBack(this.state.lastStack)}/>
-                                        </View>
-                                        <Notifs/>
-                                    </>
-                                }
-                                {(this.state.goToUser === false && this.state.goToNotifs === false) &&
+                                {(this.state.goToUser === false) &&
                                     <NavigationContainer>
                                         <Bottom
                                             online={this.setOnlineStt}
+                                            notifs={this.setNotificationsContent}
+                                            missionDoted={this.missionDoted}
                                             setPreviousStack={this.setPreviousStack}
                                             getPreviousStack={this.getPreviousStack}/>
                                     </NavigationContainer>
@@ -273,5 +328,31 @@ const styles = StyleSheet.create({
         zIndex: 2,
         width: 40,
         height: 40
+    },
+    notifDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 12,
+        backgroundColor: Css().root.red,
+        borderStyle: 'solid',
+        borderWidth: 1,
+        borderColor: Css().root.thinGrey,
+        position: 'absolute',
+        top: 0,
+        right: -2,
+        zIndex: 2
+    },
+    missionDoted: {
+        width: 14,
+        height: 14,
+        borderRadius: 14,
+        backgroundColor: Css().root.red,
+        borderStyle: 'solid',
+        borderWidth: 1,
+        borderColor: Css().root.thinGrey,
+        position: 'absolute',
+        top: -2,
+        left: -2,
+        zIndex: 2
     }
 })

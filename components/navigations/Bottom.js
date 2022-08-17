@@ -17,7 +17,9 @@ export default class Bottom extends React.Component {
         super(props);
         this.state = {
             getPreviousStack: props.getPreviousStack,
-            setPreviousStack: props.setPreviousStack
+            setPreviousStack: props.setPreviousStack,
+            setNotificationsContent: props.notifs,
+            missionDoted: props.missionDoted
         }
     }
 
@@ -51,7 +53,7 @@ export default class Bottom extends React.Component {
 
                     <BottomTab.Screen
                         name="Missions"
-                        children={() => <Missions style={{padding: 10}}/>}
+                        children={() => <Missions notifs={this.state.setNotificationsContent} missionDoted={this.state.missionDoted} style={{padding: 10}}/>}
                         options={{
                             tabBarIcon: (data) => (<MissionsSvg active={this.state.getPreviousStack()}/>),
                         }}
