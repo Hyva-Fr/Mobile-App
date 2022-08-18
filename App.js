@@ -90,10 +90,16 @@ export default class App extends React.Component {
         this.loadFonts()
         this.isOnlineChecker()
         getData('init', (data) => {
-            this.setState({user: data})
+            if (data === null) {
+                this.setState({user: null})
+            } else {
+                this.setState({user: data})
+            }
         })
         getData('notifs', (data) => {
-            this.setState({notifsSettings: data})
+            if (data !== null) {
+                this.setState({notifsSettings: data})
+            }
         })
     }
 
@@ -206,7 +212,6 @@ export default class App extends React.Component {
                                         }
                                         <Account
                                             style={{marginLeft: 20}}
-                                            online={this.setOnlineStt}
                                             onPress={() => this.setState({goToNotifs: false, goToUser: true, headerIcon: 'Account'})}
                                             headerIcon={this.state.headerIcon}
                                         />
@@ -222,7 +227,7 @@ export default class App extends React.Component {
                                             <Text style={styles.fakeHeaderTitle}>My Account</Text>
                                             <Arrow style={styles.arrow} onPress={() => this.goBack(this.state.lastStack)}/>
                                         </View>
-                                        <User logout={this.logout} user={this.state.user}/>
+                                        <User online={this.setOnlineStt} logout={this.logout} user={this.state.user}/>
                                     </>
                                 }
                                 {(this.state.goToUser === false) &&
@@ -273,7 +278,7 @@ export default class App extends React.Component {
                 }
             } else {
                 return (
-                    <Loader/>
+                    <Loader bg={true}/>
                 )
             }
         } else {

@@ -10,6 +10,8 @@ import Plus from "../components/svg/Plus";
 import Minus from "../components/svg/Minus";
 import Pen from "../components/svg/Pen";
 import CloseSvg from "../components/svg/Close";
+import FormParser from "../utils/FormParser";
+import Button from "../components/ui-kit/Button";
 
 const screenWidth = Dimensions.get('window').width
 
@@ -21,11 +23,13 @@ export default class Forms extends React.Component {
             categories: null,
             form: null,
             dropdown: null,
-            formName: null
+            formName: null,
+            online: props.online
         }
     }
 
     componentDidMount() {
+        this.state.online()
         getData('init', (json) => {
             XHR('get', '/forms', {'email': json.email, 'password': json.password}, (resp) => {
                 if (resp.message === 'ok') {
@@ -70,12 +74,37 @@ export default class Forms extends React.Component {
                         style={styles.modalScroll}
                         keyboardShouldPersistTaps='always'
                         keyboardDismissMode="on-drag"
+                        contentContainerStyle={{alignItems: 'center'}}
                     >
-
+                        {form.main.content.map((row, i) => {
+                            return(
+                                <FormParser key={i} data={row} index={i} listen={this.rowListener}/>
+                            )
+                        })}
+                        <Button
+                            type='yellow'
+                            label='Validate'
+                            style={styles.button}
+                            process={() => this.validateForm()}
+                        />
                     </ScrollView>
                 </View>
             </View>
         )
+    }
+
+    rowListener = (data, i) => {
+        let form = this.state.form
+        if (form !== null) {
+            console.log(data, form.main.content[i])
+        }
+    }
+
+    validateForm = () => {
+        let form = this.state.form
+        if (form !== null) {
+            console.log(form)
+        }
     }
 
     render() {
@@ -104,7 +133,6 @@ export default class Forms extends React.Component {
                                                     </View>
                                                     <View
                                                         style={(this.state.dropdown !== i) ? styles.action : styles.noAction}
-                                                        onPress={() => console.log(category)}
                                                     >
                                                         {(this.state.dropdown !== i)
                                                             ? <Plus
@@ -284,4 +312,8 @@ const styles = StyleSheet.create({
         borderTopColor: Css().root.yellow,
         padding: 10
     },
+    button: {
+        marginTop: 20,
+        marginBottom: 20
+    }
 })

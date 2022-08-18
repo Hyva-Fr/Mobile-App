@@ -79,11 +79,13 @@ export default class User extends React.Component {
             pwdVisible: false,
             newPwdVisible: false,
             confirmPwdVisible: false,
-            disconnect: props.logout
+            disconnect: props.logout,
+            online: props.online
         }
     }
 
     componentDidMount() {
+        this.state.online()
         getData('init', (data) => {
             XHR('post', '/profile/get-avatar/' + this.state.user.id, {}, (resp) => {
                 let avatar = (resp.data === null || resp.data === '') ? Avatar["default-avatar"] : resp.data

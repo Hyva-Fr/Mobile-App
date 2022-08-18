@@ -9,6 +9,7 @@ export default class Loader extends React.Component{
         this.state = {
             startValue: new Animated.Value(0),
             endValue: 1,
+            bg: props.bg
         };
     }
 
@@ -37,9 +38,9 @@ export default class Loader extends React.Component{
     }
 
     render() {
-
+        let color = (this.state.bg === true) ? Css().root.yellow : 'transparent';
         return (
-            <View style={styles.page}>
+            <View style={[styles.page, {backgroundColor: color} ]}>
                 <View style={styles.view}>
                     <Animated.View style={[styles.container, this.animation()]}>
                         <Animated.View style={[styles.loader, this.animation()]}>
@@ -57,7 +58,6 @@ const styles = StyleSheet.create({
     page: {
         height: '100%',
         width: '100%',
-        backgroundColor: Css().root.yellow,
         position: 'absolute',
         top: 0,
         left: 0,

@@ -8,6 +8,7 @@ import Agency from "../components/svg/Agency";
 import Email from "../components/svg/Email";
 import Css from "../utils/CSS";
 import * as Linking from 'expo-linking';
+import Loader from "../components/ui-kit/Loader";
 
 const screenWidth = Dimensions.get('window').width
 
@@ -20,11 +21,13 @@ export default class Infos extends React.Component {
             users: null,
             sound: true,
             alert: true,
-            badge: true
+            badge: true,
+            online: props.online
         }
     }
 
     componentDidMount() {
+        this.state.online()
         getData('init', (json) => {
             XHR('get', '/users/' + json.id, {'email': json.email, 'password': json.password}, (resp) => {
                 if (resp.message === 'ok') {

@@ -1,7 +1,7 @@
 import React, {useCallback} from "react";
 import { Text, ScrollView, View, StyleSheet, Dimensions, Image, TouchableHighlight, TextInput } from "react-native";
 import XHR from "../utils/XHR";
-import {getData} from "../utils/Storage";
+import {getData, removeData} from "../utils/Storage";
 import Loader from "../components/ui-kit/Loader";
 import Css from '../utils/CSS';
 import MissionSvg from "../components/svg/Missions";
@@ -27,12 +27,18 @@ export default class Missions extends React.Component {
             init: null,
             comment: null,
             setNotificationsContent: props.notifs,
-            missionDoted: props.missionDoted
+            missionDoted: props.missionDoted,
+            online: props.online
         }
     }
 
     componentDidMount() {
+        this.state.online()
         getData('init', (json) => {
+            if (json === null) {
+                this.setState({init: null})
+                return
+            }
             XHR('get', '/missions', {email: json.email, password: json.password}, (data) => {
                 this.setState({missions: data.data, init: json})
             }, json.token)
@@ -252,9 +258,7 @@ export default class Missions extends React.Component {
                 )
             }
         } else {
-            return (
-                <Loader/>
-            )
+            return null
         }
     }
 }

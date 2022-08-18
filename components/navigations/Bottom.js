@@ -19,7 +19,8 @@ export default class Bottom extends React.Component {
             getPreviousStack: props.getPreviousStack,
             setPreviousStack: props.setPreviousStack,
             setNotificationsContent: props.notifs,
-            missionDoted: props.missionDoted
+            missionDoted: props.missionDoted,
+            online: props.online
         }
     }
 
@@ -53,12 +54,13 @@ export default class Bottom extends React.Component {
 
                     <BottomTab.Screen
                         name="Missions"
-                        children={() => <Missions notifs={this.state.setNotificationsContent} missionDoted={this.state.missionDoted} style={{padding: 10}}/>}
+                        children={() => <Missions online={this.state.online} notifs={this.state.setNotificationsContent} missionDoted={this.state.missionDoted} style={{padding: 10}}/>}
                         options={{
                             tabBarIcon: (data) => (<MissionsSvg active={this.state.getPreviousStack()}/>),
                         }}
                         listeners={({ navigation, route }) => ({
                             tabPress: e => {
+                                this.state.online()
                                 this.state.setPreviousStack(route.name)
                             },
                         })}
@@ -66,12 +68,13 @@ export default class Bottom extends React.Component {
 
                     <BottomTab.Screen
                         name="Forms"
-                        children={() => <Forms style={{padding: 10}}/>}
+                        children={() => <Forms online={this.state.online} style={{padding: 10}}/>}
                         options={{
                             tabBarIcon: () => (<FormSvg active={this.state.getPreviousStack()}/>),
                         }}
                         listeners={({ navigation, route }) => ({
                             tabPress: e => {
+                                this.state.online()
                                 this.state.setPreviousStack(route.name)
                             },
                         })}
@@ -79,12 +82,13 @@ export default class Bottom extends React.Component {
 
                     <BottomTab.Screen
                         name="Infos"
-                        children={() => <Infos style={{padding: 10}}/>}
+                        children={() => <Infos online={this.state.online} style={{padding: 10}}/>}
                         options={{
                             tabBarIcon: () => (<InfosSvg active={this.state.getPreviousStack()}/>),
                         }}
                         listeners={({ navigation, route }) => ({
                             tabPress: e => {
+                                this.state.online()
                                 this.state.setPreviousStack(route.name)
                             },
                         })}
