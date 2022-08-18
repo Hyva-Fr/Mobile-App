@@ -106,7 +106,7 @@ export default class Forms extends React.Component {
                                 descriptionText=""
                                 clearText="Clear"
                                 confirmText="Save"
-                                imageType="image/jpeg"
+                                imageType="image/png"
                                 webStyle={style}
                             />
                         </View>
@@ -135,7 +135,8 @@ export default class Forms extends React.Component {
         if (form !== null) {
             if (signature !== null) {
                 this.setState({signatureError: false})
-                console.log(form, signature)
+                form.signature = signature
+                console.log(form)
             } else {
                 this.setState({signatureError: true})
             }
