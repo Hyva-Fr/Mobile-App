@@ -12,6 +12,8 @@ import Pen from "../components/svg/Pen";
 import CloseSvg from "../components/svg/Close";
 import FormParser from "../utils/FormParser";
 import Button from "../components/ui-kit/Button";
+import Signature from "react-native-signature-canvas";
+import Check from "../components/svg/Check";
 
 const screenWidth = Dimensions.get('window').width
 
@@ -19,12 +21,17 @@ export default class Forms extends React.Component {
 
     constructor(props) {
         super(props);
+
         this.state = {
             categories: null,
             form: null,
             dropdown: null,
             formName: null,
-            online: props.online
+            online: props.online,
+            scrollEnabled: true,
+            signature: null,
+            signatureError: false,
+            signatureValidate: false
         }
     }
 
@@ -75,12 +82,34 @@ export default class Forms extends React.Component {
                         keyboardShouldPersistTaps='always'
                         keyboardDismissMode="on-drag"
                         contentContainerStyle={{alignItems: 'center'}}
+                        scrollEnabled={this.state.scrollEnabled}
                     >
                         {form.main.content.map((row, i) => {
                             return(
                                 <FormParser key={i} data={row} index={i} listen={this.rowListener}/>
                             )
                         })}
+                        {this.state.signatureError === true &&
+                            <Text style={styles.signatureError}>You must save yur signature before valide the form.</Text>
+                        }
+                        <Text style={styles.label}>Signature</Text>
+                        <View style={{height: 350, width: '100%'}}>
+                            {this.state.signatureValidate === true &&
+                                <Check style={styles.check} fill={Css().root.green}/>
+                            }
+                            <Signature
+                                onOK={(img) => this.setState({signature: img, signatureError: false, signatureValidate: true})}
+                                onBegin={() => this.setState({scrollEnabled: false})}
+                                onEnd={() => this.setState({scrollEnabled: true})}
+                                onClear={() => this.setState({signature: null, signatureError: false, signatureValidate: false})}
+                                onEmpty={() => this.setState({signature: null, signatureError: false, signatureValidate: false})}
+                                descriptionText=""
+                                clearText="Clear"
+                                confirmText="Save"
+                                imageType="image/jpeg"
+                                webStyle={style}
+                            />
+                        </View>
                         <Button
                             type='yellow'
                             label='Validate'
@@ -101,9 +130,15 @@ export default class Forms extends React.Component {
     }
 
     validateForm = () => {
-        let form = this.state.form
+        let form = this.state.form,
+            signature = this.state.signature
         if (form !== null) {
-            console.log(form)
+            if (signature !== null) {
+                this.setState({signatureError: false})
+                console.log(form, signature)
+            } else {
+                this.setState({signatureError: true})
+            }
         }
     }
 
@@ -180,6 +215,17 @@ export default class Forms extends React.Component {
         }
     }
 }
+
+const style = `.m-signature-pad--footer
+    .button {
+      background-color: ${Css().root.lightGrey};
+      color: ${Css().root.yellow};
+      font-family: 'Lato-Bold';
+      font-size: 16;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+      border-radius: 500px
+    }`;
 
 const styles = StyleSheet.create({
     view: {
@@ -315,5 +361,31 @@ const styles = StyleSheet.create({
     button: {
         marginTop: 20,
         marginBottom: 20
+    },
+    label: {
+        fontFamily: 'Lato-Bold',
+        fontSize: 14,
+        color: Css().root.lightGrey,
+        marginBottom: 5,
+        width: '100%'
+    },
+    signatureError: {
+        color: Css().root.white,
+        fontFamily: 'Lato-Light',
+        marginTop: 10,
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        backgroundColor: Css().root.red,
+        borderRadius: 6,
+        textAlign: 'center',
+        marginBottom: 10
+    },
+    check: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 2
     }
 })

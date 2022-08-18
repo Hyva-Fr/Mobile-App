@@ -233,6 +233,7 @@ export default class App extends React.Component {
                                 {(this.state.goToUser === false) &&
                                     <NavigationContainer>
                                         <Bottom
+                                            logout={this.logout}
                                             online={this.setOnlineStt}
                                             notifs={this.setNotificationsContent}
                                             missionDoted={this.missionDoted}

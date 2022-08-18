@@ -1,8 +1,11 @@
 import React from "react";
-import {View, Text, StyleSheet} from "react-native";
+import {View, Text, StyleSheet, TextInput} from "react-native";
 import Css from "./CSS";
+import {Picker} from '@react-native-picker/picker';
 
 export default function FormParser(props) {
+
+    //console.log(props.data)
 
     switch(props.data.title) {
         case 'Start section':
@@ -57,7 +60,17 @@ function MultiChoices(props) {
 function NumberBlock(props) {
     return(
         <View style={[styles.numberBlock, styles.common]}>
-            <Text style={styles.label}>{props.data.label}</Text>
+            <Text style={styles.label}>{props.data.label}
+                {(props.data.unit && props.data.unit !== '') &&
+                    <Text style={styles.unit}> ({props.data.unit})</Text>
+                }
+            </Text>
+            <TextInput
+                style={styles.input}
+                onChangeText={text => props.listen(text, props.index, props.data.type)}
+                autoCorrect={false}
+                keyboardType='decimal-pad'
+            />
         </View>
     )
 }
@@ -82,6 +95,11 @@ function OneLineBlock(props) {
     return(
         <View style={[styles.oneLineBlock, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
+            <TextInput
+                style={styles.input}
+                onChangeText={text => props.listen(text, props.index, props.data.type)}
+                autoCorrect={false}
+            />
         </View>
     )
 }
@@ -90,6 +108,12 @@ function TextBlock(props) {
     return(
         <View style={[styles.textBlock, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
+            <TextInput
+                multiline={true}
+                style={[styles.input, styles.textarea]}
+                onChangeText={text => props.listen(text, props.index, props.data.type)}
+                autoCorrect={false}
+            />
         </View>
     )
 }
@@ -98,6 +122,12 @@ function CommentsBlock(props) {
     return(
         <View style={[styles.commentsBlock, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
+            <TextInput
+                multiline={true}
+                style={[styles.input, styles.textarea]}
+                onChangeText={text => props.listen(text, props.index, props.data.type)}
+                autoCorrect={false}
+            />
         </View>
     )
 }
@@ -126,7 +156,8 @@ const styles = StyleSheet.create({
     label: {
         fontFamily: 'Lato-Bold',
         fontSize: 14,
-        color: Css().root.lightGrey
+        color: Css().root.lightGrey,
+        marginBottom: 5
     },
     options: {
         fontFamily: 'Lato-LightItalic',
@@ -157,6 +188,12 @@ const styles = StyleSheet.create({
     numberBlock: {
 
     },
+    unit: {
+        fontFamily: 'Lato-LightItalic',
+        fontSize: 12,
+        color: Css().root.thinGrey,
+        fontStyle: 'italic'
+    },
     singleChoice: {
 
     },
@@ -178,4 +215,19 @@ const styles = StyleSheet.create({
     imageBlock: {
 
     },
+    input: {
+        width: '100%',
+        padding: 10,
+        borderRadius: 6,
+        borderStyle: 'solid',
+        borderColor: Css().root.thinGrey,
+        borderWidth: 1
+
+    },
+    textarea: {
+        backgroundColor: Css().root.white,
+        height: 100,
+        justifyContent: "flex-start",
+        textAlignVertical: 'top'
+    }
 })
