@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {View, Text, StyleSheet, TextInput, Button, Platform} from "react-native";
+import {View, Text, StyleSheet, TextInput, TouchableHighlight, Platform} from "react-native";
 import Css from "./CSS";
 import {Picker} from '@react-native-picker/picker';
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
@@ -54,28 +54,42 @@ function EndSection(props) {
 function MultiChoices(props) {
 
     const [agree, setAgree] = useState(false);
+    const [agree2, setAgree2] = useState(false);
 
     return(
         <View style={[styles.multiChoices, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
             <View style={styles.checkBoxContainer}>
-                <View style={styles.wrapper}>
-                    <CheckBox
-                        value={agree}
-                        onValueChange={() => setAgree(!agree)}
-                        color={agree ? Css().root.yellow : undefined}
-                    />
-                    <Text style={styles.text}>
-                        I have read and agreed with the terms and conditions
-                    </Text>
-                </View>
-                <Button
-                    title="Sign Up"
-                    disabled={!agree}
-                    onPress={() => {
-                        /* Do something */
-                    }}
-                />
+                <TouchableHighlight
+                    activeOpacity={1}
+                    underlayColor={Css().root.white}
+                    onPress={() => setAgree(!agree)}
+                >
+                    <View style={styles.wrapper}>
+                        <CheckBox
+                            value={agree}
+                            color={agree ? Css().root.yellow : undefined}
+                        />
+                        <Text style={styles.text}>
+                            I have read and agreed
+                        </Text>
+                    </View>
+                </TouchableHighlight>
+                <TouchableHighlight
+                    activeOpacity={1}
+                    underlayColor={Css().root.white}
+                    onPress={() => setAgree2(!agree2)}
+                >
+                    <View style={styles.wrapper}>
+                        <CheckBox
+                            value={agree2}
+                            color={agree2 ? Css().root.yellow : undefined}
+                        />
+                        <Text style={styles.text}>
+                            I have read and agreed 2
+                        </Text>
+                    </View>
+                </TouchableHighlight>
             </View>
         </View>
     )
@@ -101,7 +115,7 @@ function NumberBlock(props) {
 
 function SingleChoice(props) {
 
-    const [current, setCurrent] = useState("test");
+    const [current, setCurrent] = useState("test1");
 
     return(
         <View style={[styles.singleChoice, styles.common]}>
@@ -120,8 +134,8 @@ function SingleChoice(props) {
                     />
                     <RadioButtonItem
                         style={styles.radioItem}
-                        value="test2"
-                        label={<Text style={styles.radio}>Test 2</Text>}
+                        value="test1"
+                        label={<Text style={styles.radio}>Test 1</Text>}
 
                     />
                 </RadioButtonGroup>
@@ -336,11 +350,12 @@ const styles = StyleSheet.create({
     },
     checkBoxContainer: {
         width: "100%",
+        marginBottom: 5
     },
     wrapper: {
         display: "flex",
         flexDirection: "row",
-        alignContent: "center",
+        alignItems: "center",
         marginTop: 10,
     },
     text: {
