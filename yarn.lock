@@ -1481,6 +1481,11 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-9.3.0.tgz#9792c23341eab5c629566baee016146f4f3f6086"
   integrity sha512-NNdMeIXXqmPCbXrWxVqRzZ1gEZ6L1ykotWnCZLVjQBUgjyGWdL5LiDM/bcIa5DLzqZY7Km08rMgB7BoHUuEmnQ==
 
+"@react-native-community/picker@^1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@react-native-community/picker/-/picker-1.8.1.tgz#94f14f0aad98fa7592967b941be97deec95c3805"
+  integrity sha512-Sj9DzX1CSnmYiuEQ5fQhExoo4XjSKoZkqLPAAybycq6RHtCuWppf+eJXRMCOJki25BlKSSt+qVqg0fIe//ujNQ==
+
 "@react-native-masked-view/masked-view@0.2.6":
   version "0.2.6"
   resolved "https://registry.yarnpkg.com/@react-native-masked-view/masked-view/-/masked-view-0.2.6.tgz#b26c52d5db3ad0926b13deea79c69620966a9221"
@@ -1490,6 +1495,11 @@
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@react-native-picker/picker/-/picker-2.2.1.tgz#32b9f540d8e88a73d8856f73cca88251cecb9614"
   integrity sha512-EC7yv22QLHlTfnbC1ez9IUdXTOh1W31x96Oir0PfskSGFFJMWWdLTg4VrcE2DsGLzbfjjkBk123c173vf2a5MQ==
+
+"@react-native-picker/picker@^1.8.3":
+  version "1.16.8"
+  resolved "https://registry.yarnpkg.com/@react-native-picker/picker/-/picker-1.16.8.tgz#2126ca54d4a5a3e9ea5e3f39ad1e6643f8e4b3d4"
+  integrity sha512-pacdQDX6V6EmjF+HoiIh6u++qx4mTK0WnhgUHRc01B+Qt5eoeUwseBqmqfTSXTx/aHDEd6PiIw7UGvKgFoqgFQ==
 
 "@react-native/assets@1.0.0":
   version "1.0.0"
@@ -5053,6 +5063,14 @@ react-native-pager-view@^5.4.9:
   version "5.4.25"
   resolved "https://registry.yarnpkg.com/react-native-pager-view/-/react-native-pager-view-5.4.25.tgz#cd639d5387a7f3d5581b55a33c5faa1cbc200f97"
   integrity sha512-3drrYwaLat2fYszymZe3nHMPASJ4aJMaxiejfA1V5SK3OygYmdtmV2u5prX7TnjueJzGSyyaCYEr2JlrRt4YPg==
+
+react-native-picker-select@^8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/react-native-picker-select/-/react-native-picker-select-8.0.4.tgz#3f7f1f42df69b06e7d2c10338288332a6c40fd10"
+  integrity sha512-orBjPIwBkV5oipyVw263YNMI56f6Kj3p/ejabZoCYYNSG3AiLVVhC2RqsxMgDA7IayyURAW+AlV+mDJyVqLBkg==
+  dependencies:
+    "@react-native-picker/picker" "^1.8.3"
+    lodash.isequal "^4.5.0"
 
 react-native-reanimated@^2.2.4:
   version "2.9.1"

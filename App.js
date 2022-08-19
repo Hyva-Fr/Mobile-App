@@ -87,6 +87,7 @@ export default class App extends React.Component {
     }
 
     componentDidMount() {
+        //removeData('init')
         this.loadFonts()
         this.isOnlineChecker()
         getData('init', (data) => {

@@ -14,6 +14,7 @@ import FormParser from "../utils/FormParser";
 import Button from "../components/ui-kit/Button";
 import Signature from "react-native-signature-canvas";
 import Check from "../components/svg/Check";
+import {Picker} from '@react-native-picker/picker';
 
 const screenWidth = Dimensions.get('window').width
 
@@ -31,23 +32,40 @@ export default class Forms extends React.Component {
             scrollEnabled: true,
             signature: null,
             signatureError: false,
-            signatureValidate: false
+            signatureValidate: false,
+            toValidationForm: null,
+            user: null,
+            missions: null,
+            mission: null,
+            missionToString: null,
+            missionExist: true,
+            selectedMissionSerial: null,
+            selectedMission: null
         }
     }
 
     componentDidMount() {
         this.state.online()
         getData('init', (json) => {
+            console.log(json)
             XHR('get', '/forms', {'email': json.email, 'password': json.password}, (resp) => {
                 if (resp.message === 'ok') {
                     this.setState({categories: resp.data})
                 }
             }, json.token)
+            XHR('get', '/users/' + json.id, {'email': json.email, 'password': json.password}, (resp) => {
+                if (resp.message === 'ok') {
+                    this.setState({user: resp})
+                }
+            }, json.token)
+            XHR('get', '/missions', {email: json.email, password: json.password}, (data) => {
+                this.setState({missions: data.data})
+            }, json.token)
         })
     }
 
-    setForm = (data, name) => {
-        let form = JSON.parse(data),
+    setForm = (data) => {
+        let form = JSON.parse(data.form),
             translate = {
                 'footer': form.footer,
                 'header': form.header,
@@ -55,12 +73,35 @@ export default class Forms extends React.Component {
                     'format': form.main.format,
                     'content': []
                 }
+            },
+            contents = form.main.content,
+            toValidate = {
+                'user_id': this.state.user.id,
+                'agency_id': this.state.user.agency.id,
+                'form_id': data.id,
+                'form': data.form
             }
-        let contents = form.main.content;
         for (let i = 0; i < contents.length; i++) {
             translate.main.content.push(JSON.parse(contents[i]))
         }
-        this.setState({form: translate, formName: name})
+        this.setState({form: translate, formName: data.name, toValidationForm: toValidate})
+    }
+
+    controlMission = (serial) => {
+        if (serial.trim() !== '') {
+            let missions = this.state.missions,
+                check = false,
+                mission = null;
+            for (let i = 0; i < missions.length; i++) {
+                if (serial === missions[i].serial) {
+                    mission = missions[i]
+                    check = true;
+                }
+            }
+            this.setState({missionExist: check, selectedMissionSerial: serial, selectedMission: mission})
+        } else {
+            this.setState({missionExist: true, selectedMissionSerial: serial, selectedMission: null})
+        }
     }
 
     formModal = () => {
@@ -71,7 +112,7 @@ export default class Forms extends React.Component {
                     <CloseSvg
                         style={styles.close}
                         fill={Css().root.yellow}
-                        onPress={() => this.setState({form: null})}
+                        onPress={() => this.setState({form: null, signatureValidate: false, toValidationForm: null})}
                     />
                     <View style={styles.modalTitleContainer}>
                         <Pen style={styles.svg} fill={Css().root.yellow}/>
@@ -84,13 +125,41 @@ export default class Forms extends React.Component {
                         contentContainerStyle={{alignItems: 'center'}}
                         scrollEnabled={this.state.scrollEnabled}
                     >
+                        <View style={styles.common}>
+                            {this.state.missionExist === false &&
+                                <Text style={styles.signatureError}>This mission does not exist.</Text>
+                            }
+                            <Text style={styles.label}>Search by serial or select a mission in list</Text>
+                            <TextInput
+                                style={styles.input}
+                                defaultValue={this.state.selectedMissionSerial}
+                                placeholder='Mission serial'
+                                onChangeText={text => this.controlMission(text)}
+                                autoCorrect={false}
+                            />
+                            <Picker
+                                style={styles.picker}
+                                themeVariant='dark'
+                                selectedValue={(this.state.selectedMissionSerial === null) ? 'none' : this.state.selectedMissionSerial}
+                                itemStyle={styles.pickerItem}
+                                onValueChange={(serial) =>
+                                    this.setState({selectedMissionSerial: serial, missionExist: true})
+                                }>
+                                    <Picker.Item enabled={false} label="Select a mission" value="none" />
+                                {this.state.missions.map((mission, i) => {
+                                    return(
+                                        <Picker.Item key={i} label={mission.serial} value={mission.serial} />
+                                    )
+                                })}
+                            </Picker>
+                        </View>
                         {form.main.content.map((row, i) => {
                             return(
                                 <FormParser key={i} data={row} index={i} listen={this.rowListener}/>
                             )
                         })}
                         {this.state.signatureError === true &&
-                            <Text style={styles.signatureError}>You must save yur signature before valide the form.</Text>
+                            <Text style={styles.signatureError}>You must save your signature before validate the form.</Text>
                         }
                         <Text style={styles.label}>Signature</Text>
                         <View style={{height: 350, width: '100%'}}>
@@ -131,7 +200,8 @@ export default class Forms extends React.Component {
 
     validateForm = () => {
         let form = this.state.form,
-            signature = this.state.signature
+            signature = this.state.signature,
+            toValidate = this.state.toValidationForm
         if (form !== null) {
             if (signature !== null) {
                 this.setState({signatureError: false})
@@ -185,6 +255,7 @@ export default class Forms extends React.Component {
                                                 {this.state.dropdown === i &&
                                                     <ScrollView>
                                                         {category.forms.map((form, j) => {
+                                                            console.log(form)
                                                             return (
                                                                 <View
                                                                     key={j}
@@ -193,7 +264,7 @@ export default class Forms extends React.Component {
                                                                     <Pen fill={Css().root.white}/>
                                                                     <Text
                                                                         style={styles.form}
-                                                                        onPress={() => this.setForm(form.form, form.name)}
+                                                                        onPress={() => this.setForm(form)}
                                                                     >
                                                                         {form.name}
                                                                     </Text>
@@ -255,6 +326,10 @@ const styles = StyleSheet.create({
     svg: {
         marginRight: 10
     },
+    common: {
+        width: '100%',
+        marginBottom: 10
+    },
     content: {
         borderStyle: 'solid',
         borderTopWidth: 1,
@@ -293,9 +368,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderStyle: 'solid',
         backgroundColor: Css().root.lightGrey,
-    },
-    dropdown: {
-
     },
     formContainer: {
         flexDirection: 'row',
@@ -388,5 +460,30 @@ const styles = StyleSheet.create({
         top: 10,
         right: 10,
         zIndex: 2
+    },
+    input: {
+        width: '100%',
+        fontFamily: 'Lato-Light',
+        padding: 10,
+        borderRadius: 6,
+        borderStyle: 'solid',
+        borderColor: Css().root.thinGrey,
+        borderWidth: 1
+    },
+    picker: {
+        position: 'absolute',
+        top: 20,
+        right: 0,
+        zIndex: 2,
+        width: 48,
+        height: 30
+    },
+    pickerContainer: {
+        marginTop: 10,
+        fontFamily: 'Lato-Light',
+        padding: 0
+    },
+    pickerItem: {
+        fontFamily: 'Lato-Light',
     }
 })
