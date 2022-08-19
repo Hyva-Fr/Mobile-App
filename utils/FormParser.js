@@ -1,7 +1,9 @@
 import React, {useState} from "react";
-import {View, Text, StyleSheet, TextInput} from "react-native";
+import {View, Text, StyleSheet, TextInput, Button, Platform} from "react-native";
 import Css from "./CSS";
 import {Picker} from '@react-native-picker/picker';
+import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import CheckBox from "expo-checkbox";
 
 export default function FormParser(props) {
 
@@ -50,9 +52,31 @@ function EndSection(props) {
 }
 
 function MultiChoices(props) {
+
+    const [agree, setAgree] = useState(false);
+
     return(
         <View style={[styles.multiChoices, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
+            <View style={styles.checkBoxContainer}>
+                <View style={styles.wrapper}>
+                    <CheckBox
+                        value={agree}
+                        onValueChange={() => setAgree(!agree)}
+                        color={agree ? Css().root.yellow : undefined}
+                    />
+                    <Text style={styles.text}>
+                        I have read and agreed with the terms and conditions
+                    </Text>
+                </View>
+                <Button
+                    title="Sign Up"
+                    disabled={!agree}
+                    onPress={() => {
+                        /* Do something */
+                    }}
+                />
+            </View>
         </View>
     )
 }
@@ -76,9 +100,32 @@ function NumberBlock(props) {
 }
 
 function SingleChoice(props) {
+
+    const [current, setCurrent] = useState("test");
+
     return(
         <View style={[styles.singleChoice, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
+            <View>
+                <RadioButtonGroup
+                    containerStyle={{ marginBottom: 10 }}
+                    selected={current}
+                    onSelected={(value) => setCurrent(value)}
+                    radioBackground={Css().root.yellow}
+                >
+                    <RadioButtonItem
+                        style={styles.radioItem}
+                        value="test2"
+                        label={<Text style={styles.radio}>Test 2</Text>}
+                    />
+                    <RadioButtonItem
+                        style={styles.radioItem}
+                        value="test2"
+                        label={<Text style={styles.radio}>Test 2</Text>}
+
+                    />
+                </RadioButtonGroup>
+            </View>
         </View>
     )
 }
@@ -287,4 +334,26 @@ const styles = StyleSheet.create({
     pickerItem: {
         fontFamily: 'Lato-Light',
     },
+    checkBoxContainer: {
+        width: "100%",
+    },
+    wrapper: {
+        display: "flex",
+        flexDirection: "row",
+        alignContent: "center",
+        marginTop: 10,
+    },
+    text: {
+        marginLeft: 10,
+        fontFamily: 'Lato-Light',
+    },
+    radioItem: {
+        marginTop: 10
+    },
+    radio: {
+        fontFamily: 'Lato-Light',
+        marginTop: 10,
+        alignSelf: 'center',
+        marginLeft: 10
+    }
 })
