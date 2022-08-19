@@ -9,6 +9,8 @@ import Mark from "../components/svg/Mark";
 import Plus from "../components/svg/Plus";
 import Minus from "../components/svg/Minus";
 import Pen from "../components/svg/Pen";
+import Lock from "../components/svg/Lock";
+import Unlock from "../components/svg/Unlock";
 import CloseSvg from "../components/svg/Close";
 import FormParser from "../utils/FormParser";
 import Button from "../components/ui-kit/Button";
@@ -36,7 +38,6 @@ export default class Forms extends React.Component {
             toValidationForm: null,
             user: null,
             missions: null,
-            mission: null,
             missionToString: null,
             missionExist: true,
             selectedMissionSerial: null,
@@ -47,7 +48,6 @@ export default class Forms extends React.Component {
     componentDidMount() {
         this.state.online()
         getData('init', (json) => {
-            console.log(json)
             XHR('get', '/forms', {'email': json.email, 'password': json.password}, (resp) => {
                 if (resp.message === 'ok') {
                     this.setState({categories: resp.data})
@@ -74,15 +74,15 @@ export default class Forms extends React.Component {
                     'content': []
                 }
             },
-            contents = form.main.content,
-            toValidate = {
-                'user_id': this.state.user.id,
-                'agency_id': this.state.user.agency.id,
-                'form_id': data.id,
-                'form': data.form
-            }
+            contents = form.main.content;
         for (let i = 0; i < contents.length; i++) {
             translate.main.content.push(JSON.parse(contents[i]))
+        }
+        let toValidate = {
+            'user_id': this.state.user.id,
+            'agency_id': this.state.user.agency.id,
+            'form_id': data.id,
+            'form': translate.main.content
         }
         this.setState({form: translate, formName: data.name, toValidationForm: toValidate})
     }
@@ -96,6 +96,7 @@ export default class Forms extends React.Component {
                 if (serial === missions[i].serial) {
                     mission = missions[i]
                     check = true;
+                    break;
                 }
             }
             this.setState({missionExist: check, selectedMissionSerial: serial, selectedMission: mission})
@@ -117,6 +118,18 @@ export default class Forms extends React.Component {
                     <View style={styles.modalTitleContainer}>
                         <Pen style={styles.svg} fill={Css().root.yellow}/>
                         <Text style={styles.title}>{this.state.formName}</Text>
+                        {(this.state.scrollEnabled === false)
+                            ? <Unlock
+                                style={styles.lock}
+                                fill={Css().root.yellow}
+                                onPress={() => this.setState({scrollEnabled: true})}
+                            />
+                            : <Lock
+                                style={styles.lock}
+                                fill={Css().root.yellow}
+                                onPress={() => this.setState({scrollEnabled: false})}
+                            />
+                        }
                     </View>
                     <ScrollView
                         style={styles.modalScroll}
@@ -143,9 +156,9 @@ export default class Forms extends React.Component {
                                     themeVariant='dark'
                                     selectedValue={(this.state.selectedMissionSerial === null) ? 'none' : this.state.selectedMissionSerial}
                                     itemStyle={styles.pickerItem}
-                                    onValueChange={(serial) =>
-                                        this.setState({selectedMissionSerial: serial, missionExist: true})
-                                    }>
+                                    onValueChange={(serial) => {
+                                        this.controlMission(serial)
+                                    }}>
                                         <Picker.Item enabled={false} label="Select a mission" value="none" />
                                     {this.state.missions.map((mission, i) => {
                                         return(
@@ -205,16 +218,19 @@ export default class Forms extends React.Component {
             signature = this.state.signature,
             toValidate = this.state.toValidationForm
         if (form !== null) {
-            if (this.state.mission !== null) {
+            if (this.state.selectedMission !== null) {
                 if (signature !== null) {
-                    this.setState({signatureError: false, missionExist: false})
+                    this.setState({signatureError: false, missionExist: true})
                     form.signature = signature
-                    console.log(form)
+                    toValidate['mission_id'] = this.state.selectedMission.id
+                    toValidate['missions'] = this.state.selectedMission
+                    toValidate['content'] = form
+                    console.log(toValidate)
                 } else {
                     this.setState({signatureError: true})
                 }
             } else {
-                this.setState({missionExist: true})
+                this.setState({missionExist: false})
             }
         }
     }
@@ -261,7 +277,6 @@ export default class Forms extends React.Component {
                                                 {this.state.dropdown === i &&
                                                     <ScrollView>
                                                         {category.forms.map((form, j) => {
-                                                            console.log(form)
                                                             return (
                                                                 <View
                                                                     key={j}
@@ -296,13 +311,25 @@ export default class Forms extends React.Component {
 
 const style = `.m-signature-pad--footer
     .button {
-      background-color: ${Css().root.lightGrey};
-      color: ${Css().root.yellow};
-      font-family: 'Lato-Bold';
-      font-size: 16;
-      letter-spacing: 0.5px;
-      font-weight: bold;
-      border-radius: 500px
+        background-color: ${Css().root.lightGrey};
+        color: ${Css().root.yellow};
+        font-family: 'Lato-Bold';
+        font-size: 16;
+        width: 49.5%;
+        letter-spacing: 0.5px;
+        font-weight: bold;
+        border-radius: 4px;
+        margin: 0;
+        transition: all linear 0.08s
+    }
+    .button:active {
+        background-color: ${Css().root.yellow};
+        color: ${Css().root.lightGrey};
+    }
+    .m-signature-pad--footer {
+        display: flex;
+        padding: 0;
+        justify-content: space-between;
     }`;
 
 const styles = StyleSheet.create({
@@ -491,5 +518,8 @@ const styles = StyleSheet.create({
     },
     pickerItem: {
         fontFamily: 'Lato-Light',
+    },
+    lock: {
+        marginLeft: 10
     }
 })

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {View, Text, StyleSheet, TextInput} from "react-native";
 import Css from "./CSS";
 import {Picker} from '@react-native-picker/picker';
@@ -84,9 +84,37 @@ function SingleChoice(props) {
 }
 
 function ListBlock(props) {
+    let [option, setOption] = useState('Select an option')
     return(
         <View style={[styles.listBlock, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
+            <View>
+                <Text
+                    style={styles.fakeInput}
+                >
+                    {(typeof option === 'number')
+                        ? props.data.options[option]
+                        : option
+                    }
+                </Text>
+                <Picker
+                    style={styles.picker}
+                    themeVariant='dark'
+                    itemStyle={styles.pickerItem}
+                    onValueChange={(opt) => {
+                        if (opt !== null) {
+                            props.listen(opt, props.index, props.data.type)
+                        }
+                        setOption(opt)
+                    }}>
+                    <Picker.Item enabled={false} label="Select an option" value="none" />
+                    {props.data.options.map((option, i) => {
+                        return(
+                            <Picker.Item key={i} label={option} value={i} />
+                        )
+                    })}
+                </Picker>
+            </View>
         </View>
     )
 }
@@ -221,13 +249,42 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         borderStyle: 'solid',
         borderColor: Css().root.thinGrey,
-        borderWidth: 1
+        borderWidth: 1,
+        fontFamily: 'Lato-Light'
 
+    },
+    fakeInput: {
+        width: '100%',
+        paddingTop: 18,
+        paddingBottom: 18,
+        paddingLeft: 10,
+        paddingRight: 10,
+        borderRadius: 6,
+        borderStyle: 'solid',
+        borderColor: Css().root.thinGrey,
+        borderWidth: 1,
+        fontFamily: 'Lato-Light'
     },
     textarea: {
         backgroundColor: Css().root.white,
         height: 100,
         justifyContent: "flex-start",
         textAlignVertical: 'top'
-    }
+    },
+    picker: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        zIndex: 2,
+        width: 48,
+        height: 30
+    },
+    pickerContainer: {
+        marginTop: 10,
+        fontFamily: 'Lato-Light',
+        padding: 0
+    },
+    pickerItem: {
+        fontFamily: 'Lato-Light',
+    },
 })

@@ -6,12 +6,14 @@ import Loader from "../components/ui-kit/Loader";
 import Css from '../utils/CSS';
 import MissionSvg from "../components/svg/Missions";
 import FolderSvg from "../components/svg/Folder";
+import Copy from "../components/svg/Copy";
 import CloseSvg from "../components/svg/Close";
 import {dateHumanizer, getSqlDate} from "../utils/DateHumanizer";
 import * as Linking from 'expo-linking';
 import Pdf from "../components/svg/Pdf";
 import Excel from "../components/svg/Excel";
 import Button from "../components/ui-kit/Button";
+import * as Clipboard from 'expo-clipboard';
 
 const screenWidth = Dimensions.get('window').width,
     webSiteURL = 'https://hyva.eint-sandbox.fr/',
@@ -28,7 +30,8 @@ export default class Missions extends React.Component {
             comment: null,
             setNotificationsContent: props.notifs,
             missionDoted: props.missionDoted,
-            online: props.online
+            online: props.online,
+            copyMessage: null
         }
     }
 
@@ -126,6 +129,14 @@ export default class Missions extends React.Component {
         }
     }
 
+    copy = (serial) => {
+        Clipboard.setString(serial);
+        this.setState({copyMessage: serial + ' copied successfully.'})
+        setTimeout(() => {
+            this.setState({copyMessage: null})
+        }, 3000)
+    }
+
     missionModal = () => {
         let mission = this.state.mission
         return(
@@ -139,12 +150,20 @@ export default class Missions extends React.Component {
                     <View style={styles.modalTitleContainer}>
                         <MissionSvg style={styles.svg} fill={Css().root.yellow}/>
                         <Text style={styles.title}>{mission.serial}</Text>
+                        <Copy
+                            style={{marginLeft: 10}}
+                            fill={Css().root.yellow}
+                            onPress={() => this.copy(mission.serial)}
+                        />
                     </View>
                     <ScrollView
                         style={styles.modalScroll}
                         keyboardShouldPersistTaps='always'
                         keyboardDismissMode="on-drag"
                     >
+                        {this.state.copyMessage !== null &&
+                            <Text style={styles.good}>{this.state.copyMessage}</Text>
+                        }
                         <View style={styles.sections}>
                             <Text style={styles.sectionTitle}>Customer information</Text>
                             <Text style={styles.societyName}>{mission.society.name}</Text>
@@ -453,5 +472,19 @@ const styles = StyleSheet.create({
     button: {
         marginTop: 20,
         marginBottom: 10
-    }
+    },
+    good: {
+        color: Css().root.white,
+        fontFamily: 'Lato-Light',
+        width: '100%',
+        marginTop: 10,
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        backgroundColor: Css().root.green,
+        borderRadius: 6,
+        textAlign: 'center',
+        marginBottom: 10
+    },
 })
