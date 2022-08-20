@@ -41,7 +41,9 @@ export default class Forms extends React.Component {
             missionToString: null,
             missionExist: true,
             selectedMissionSerial: null,
-            selectedMission: null
+            selectedMission: null,
+            countError: false,
+            validated: false
         }
     }
 
@@ -74,15 +76,18 @@ export default class Forms extends React.Component {
                     'content': []
                 }
             },
+            clone = [],
             contents = form.main.content;
         for (let i = 0; i < contents.length; i++) {
             translate.main.content.push(JSON.parse(contents[i]))
+            clone.push(JSON.parse(contents[i]))
         }
         let toValidate = {
             'user_id': this.state.user.id,
             'agency_id': this.state.user.agency.id,
             'form_id': data.id,
-            'form': translate.main.content
+            'form': translate.main.content,
+            'content': clone
         }
         this.setState({form: translate, formName: data.name, toValidationForm: toValidate})
     }
@@ -110,11 +115,24 @@ export default class Forms extends React.Component {
         return(
             <View style={styles.modalContainer}>
                 <View style={styles.modal}>
-                    <CloseSvg
-                        style={styles.close}
-                        fill={Css().root.yellow}
-                        onPress={() => this.setState({form: null, signatureValidate: false, toValidationForm: null, selectedMissionSerial: null})}
-                    />
+                    {this.state.validated === false &&
+                        <CloseSvg
+                            style={styles.close}
+                            fill={Css().root.yellow}
+                            onPress={() => this.setState({
+                                form: null,
+                                signatureValidate: false,
+                                toValidationForm: null,
+                                selectedMissionSerial: null
+                            })}
+                        />
+                    }
+
+                    {this.state.validated === true &&
+                        <View style={styles.validation}>
+                            <Text style={styles.validationText}>Form validated</Text>
+                        </View>
+                    }
                     <View style={styles.modalTitleContainer}>
                         <Pen style={styles.svg} fill={Css().root.yellow}/>
                         <Text style={styles.title}>{this.state.formName}</Text>
@@ -194,6 +212,9 @@ export default class Forms extends React.Component {
                                 webStyle={style}
                             />
                         </View>
+                        {this.state.countError === true &&
+                            <Text style={styles.signatureError}>You must fill all required fields.</Text>
+                        }
                         <Button
                             type='yellow'
                             label='Validate'
@@ -207,9 +228,11 @@ export default class Forms extends React.Component {
     }
 
     rowListener = (data, i) => {
-        let form = this.state.form
+        let form = this.state.form,
+            toValidate = this.state.toValidationForm
         if (form !== null) {
-            //console.log(data, form.main.content[i])
+            toValidate.content[i].response = data
+            this.setState({'toValidationForm': toValidate})
         }
     }
 
@@ -222,10 +245,34 @@ export default class Forms extends React.Component {
                 if (signature !== null) {
                     this.setState({signatureError: false, missionExist: true})
                     form.signature = signature
-                    toValidate['mission_id'] = this.state.selectedMission.id
-                    toValidate['missions'] = this.state.selectedMission
-                    toValidate['content'] = form
-                    console.log(toValidate)
+                    let countChecker = this.counter(form.main.content, 'form')
+                    let countValidate = this.counter(toValidate.content, 'validate')
+                    console.log(countChecker)
+                    if (countValidate < countChecker) {
+                        this.setState({countError: true})
+                    } else {
+                        this.setState({countError: false})
+                        toValidate['mission_id'] = this.state.selectedMission.id
+                        toValidate['missions'] = this.state.selectedMission
+                        this.setState({validated: true})
+                        setTimeout(() => {
+                            console.log(toValidate)
+                            this.setState({
+                                form: null,
+                                formName: null,
+                                signature: null,
+                                signatureError: false,
+                                signatureValidate: false,
+                                toValidationForm: null,
+                                missionToString: null,
+                                missionExist: true,
+                                selectedMissionSerial: null,
+                                selectedMission: null,
+                                countError: false,
+                                validated: false
+                            })
+                        }, 3000)
+                    }
                 } else {
                     this.setState({signatureError: true})
                 }
@@ -233,6 +280,29 @@ export default class Forms extends React.Component {
                 this.setState({missionExist: false})
             }
         }
+    }
+
+    counter = (objects, mode) => {
+        let cnt = 0
+
+        if (mode === 'form') {
+            for (let i = 0; i < objects.length; i++) {
+                let object = objects[i],
+                    excepts = ['options', 'start', 'end', 'images', 'comments']
+                if (object.data && !excepts.includes(object.data)) {
+                    cnt++
+                }
+            }
+        } else {
+            for (let i = 0; i < objects.length; i++) {
+                let object = objects[i],
+                    excepts = ['options', 'start', 'end', 'images', 'comments']
+                if (object.response && object.data && !excepts.includes(object.data)) {
+                    cnt++
+                }
+            }
+        }
+        return cnt
     }
 
     render() {
@@ -445,7 +515,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -7,
         right: -7,
-        zIndex: 2,
+        zIndex: 4,
         borderRadius: 24,
         borderStyle: 'solid',
         borderWidth: 1,
@@ -521,5 +591,24 @@ const styles = StyleSheet.create({
     },
     lock: {
         marginLeft: 10
+    },
+    validation: {
+        position: 'absolute',
+        zIndex: 3,
+        backgroundColor: Css().root.white,
+        justifyContent: 'center',
+        alignItems: 'center',
+        top: 0,
+        left: 0,
+        height: '100%',
+        width: '100%',
+        borderRadius: 6,
+    },
+    validationText: {
+        padding: 10,
+        backgroundColor: Css().root.green,
+        color: Css().root.white,
+        fontFamily: 'Lato-Bold',
+        borderRadius: 6
     }
 })

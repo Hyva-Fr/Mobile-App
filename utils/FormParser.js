@@ -1,9 +1,16 @@
 import React, {useState} from "react";
-import {View, Text, StyleSheet, TextInput, Pressable, Platform} from "react-native";
+import {View, Text, StyleSheet, TextInput, Pressable, Image, Dimensions} from "react-native";
 import Css from "./CSS";
 import {Picker} from '@react-native-picker/picker';
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import CheckBox from "expo-checkbox";
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import XHR from "./XHR";
+import Button from "../components/ui-kit/Button";
+import Close from "../components/svg/Close";
+
+const screenWidth = Dimensions.get('window').width
 
 export default function FormParser(props) {
 
@@ -85,7 +92,7 @@ function MultiChoices(props) {
             }
         }
         props.listen(selected, props.index, props.data.type)
-        setSelected(selected);
+        setSelected({...selected});
     }
 
     const getTextarea = (value) => {
@@ -96,7 +103,7 @@ function MultiChoices(props) {
         }
         setOther(value)
         props.listen(selected, props.index, props.data.type)
-        setSelected(selected)
+        setSelected({...selected})
     }
 
     return(
@@ -104,6 +111,7 @@ function MultiChoices(props) {
             <Text style={styles.label}>{props.data.label}</Text>
             <View style={styles.checkBoxContainer}>
                 {options.map((option, i) => {
+                    let sel = selected.check[i] && selected.check[i] === option
                     return(
                         <Pressable
                             style={styles.wrapper}
@@ -111,8 +119,8 @@ function MultiChoices(props) {
                             onPressIn={() => getSelection(option, i)}
                         >
                             <CheckBox
-                                value={selected.check[i] === option}
-                                color={selected.check[i] === option ? Css().root.yellow : undefined}
+                                value={sel}
+                                color={sel ? Css().root.yellow : undefined}
                             />
                             <Text style={styles.text}>
                                 {option}
@@ -154,11 +162,7 @@ function NumberBlock(props) {
 
 function SingleChoice(props) {
 
-    let start = null
-    if (props.data.options.length > 0) {
-        start = props.data.options[0]
-    }
-    const [current, setCurrent] = useState(start);
+    const [current, setCurrent] = useState(null);
     const [other, setOther] = useState(null);
     const others = ['autre', 'autres', 'other', 'others', '?'];
 
@@ -292,9 +296,71 @@ function OptionsBlock(props) {
 }
 
 function ImageBlock(props) {
+
+    const allowed = ['jpg', 'jpeg', 'png'];
+    let imgs = []
+    let [images, setImages] = useState([])
+
+    const loadImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.cancelled) {
+            let split = result.uri.split('.'),
+                ext = split[split.length-1],
+                base64 = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' });
+            if (allowed.includes(ext)) {
+                images.push('data:image/' + ext + ';base64,' +  base64);
+                console.log(images)
+                setImages([...images])
+                props.listen(images, props.index, props.data.type)
+            }
+        } else {
+            console.log('Failed to upload image')
+        }
+    }
+
+    const close = (index) => {
+        images.splice(index, 1);
+        setImages([...images])
+        props.listen(images, props.index, props.data.type)
+    }
+
     return(
         <View style={[styles.imageBlock, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
+            {(images.length > 0)
+                ? <View style={styles.imagesContainer}>
+                    {images.map((img, i) => {
+                        return(
+                            <View key={i} style={styles.imagePreview}>
+                                <Close
+                                    fill={Css().root.yellow}
+                                    style={styles.close}
+                                    onPress={() => close(i)}
+                                />
+                                <Image
+                                    style={styles.image}
+                                    source={{uri: img}}
+                                />
+                            </View>
+                        )
+                    })}
+                </View>
+                : <View>
+                    <Text style={styles.noImg}>No image uploaded.</Text>
+                </View>
+            }
+            <Button
+                type='yellow'
+                label='Upload'
+                style={styles.button}
+                process={() => loadImage()}
+            />
         </View>
     )
 }
@@ -435,5 +501,40 @@ const styles = StyleSheet.create({
     },
     checkboxOther: {
         marginTop: 10
+    },
+    button: {
+        marginTop: 20,
+        alignSelf: 'center'
+    },
+    noImg: {
+        width: '100%',
+        fontFamily: 'Lato-LightItalic',
+        color: Css().root.thinGrey,
+        textAlign: 'center'
+    },
+    close: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        zIndex: 2,
+        borderRadius: 24
+    },
+    imagesContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap'
+    },
+    imagePreview: {
+        resizeMode: 'cover',
+        width: (screenWidth - 50)/2,
+        height: (screenWidth - 50)/2,
+        borderRadius: 6,
+    },
+    image: {
+        resizeMode: 'cover',
+        width: '100%',
+        height: '100%',
+        borderRadius: 6,
+        marginBottom: 10
     }
 })
