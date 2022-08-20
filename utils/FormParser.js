@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {View, Text, StyleSheet, TextInput, TouchableHighlight, Platform} from "react-native";
+import {View, Text, StyleSheet, TextInput, Pressable, Platform} from "react-native";
 import Css from "./CSS";
 import {Picker} from '@react-native-picker/picker';
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
@@ -53,43 +53,82 @@ function EndSection(props) {
 
 function MultiChoices(props) {
 
-    const [agree, setAgree] = useState(false);
-    const [agree2, setAgree2] = useState(false);
+    let selection = {check: [], other: null}
+
+    const options = props.data.options,
+        [selected, setSelected] = useState(selection),
+        [other, setOther] = useState(null),
+        [openOther, setOpenOther] = useState(false),
+        others = ['autre', 'autres', 'other', 'others', '?']
+
+    for (let i = 0; i < options.length; i++) {
+        selection.check.push(null);
+    }
+
+    const getSelection = (value, index) => {
+
+        if (others.includes(value) === true) {
+            if (openOther === true) {
+                setOpenOther(false)
+                setOther(null)
+            } else {
+                setOpenOther(true)
+            }
+        }
+
+        if (selected.check[index] === null) {
+            selected.check[index] = value
+        } else {
+            selected.check[index] = null
+            if (others.includes(value) === true) {
+                selected.other = null
+            }
+        }
+        props.listen(selected, props.index, props.data.type)
+        setSelected(selected);
+    }
+
+    const getTextarea = (value) => {
+
+        selected.other = value
+        if (value.trim() === '') {
+            value = null
+        }
+        setOther(value)
+        props.listen(selected, props.index, props.data.type)
+        setSelected(selected)
+    }
 
     return(
         <View style={[styles.multiChoices, styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
             <View style={styles.checkBoxContainer}>
-                <TouchableHighlight
-                    activeOpacity={1}
-                    underlayColor={Css().root.white}
-                    onPress={() => setAgree(!agree)}
-                >
-                    <View style={styles.wrapper}>
-                        <CheckBox
-                            value={agree}
-                            color={agree ? Css().root.yellow : undefined}
-                        />
-                        <Text style={styles.text}>
-                            I have read and agreed
-                        </Text>
-                    </View>
-                </TouchableHighlight>
-                <TouchableHighlight
-                    activeOpacity={1}
-                    underlayColor={Css().root.white}
-                    onPress={() => setAgree2(!agree2)}
-                >
-                    <View style={styles.wrapper}>
-                        <CheckBox
-                            value={agree2}
-                            color={agree2 ? Css().root.yellow : undefined}
-                        />
-                        <Text style={styles.text}>
-                            I have read and agreed 2
-                        </Text>
-                    </View>
-                </TouchableHighlight>
+                {options.map((option, i) => {
+                    return(
+                        <Pressable
+                            style={styles.wrapper}
+                            key={i}
+                            onPressIn={() => getSelection(option, i)}
+                        >
+                            <CheckBox
+                                value={selected.check[i] === option}
+                                color={selected.check[i] === option ? Css().root.yellow : undefined}
+                            />
+                            <Text style={styles.text}>
+                                {option}
+                            </Text>
+                        </Pressable>
+                    )
+                })}
+                {openOther === true &&
+                    <TextInput
+                        multiline={true}
+                        style={[styles.input, styles.textarea, styles.checkboxOther]}
+                        onChangeText={text => getTextarea(text)}
+                        autoCorrect={false}
+                        defaultValue={other}
+                    />
+                }
             </View>
         </View>
     )
@@ -115,7 +154,14 @@ function NumberBlock(props) {
 
 function SingleChoice(props) {
 
-    const [current, setCurrent] = useState("test1");
+    let start = null
+    if (props.data.options.length > 0) {
+        start = props.data.options[0]
+    }
+    const [current, setCurrent] = useState(start);
+    const [other, setOther] = useState(null);
+    const others = ['autre', 'autres', 'other', 'others', '?'];
+
 
     return(
         <View style={[styles.singleChoice, styles.common]}>
@@ -124,21 +170,40 @@ function SingleChoice(props) {
                 <RadioButtonGroup
                     containerStyle={{ marginBottom: 10 }}
                     selected={current}
-                    onSelected={(value) => setCurrent(value)}
+                    onSelected={(value) => {
+                        setCurrent(value)
+                        if (!others.includes(value)) {
+                            setOther(null)
+                        }
+                        props.listen([value, other], props.index, props.data.type)
+                    }}
                     radioBackground={Css().root.yellow}
                 >
-                    <RadioButtonItem
-                        style={styles.radioItem}
-                        value="test2"
-                        label={<Text style={styles.radio}>Test 2</Text>}
-                    />
-                    <RadioButtonItem
-                        style={styles.radioItem}
-                        value="test1"
-                        label={<Text style={styles.radio}>Test 1</Text>}
-
-                    />
+                    {props.data.options.map((option, i) => {
+                        return(
+                            <RadioButtonItem
+                                key={i}
+                                style={styles.radioItem}
+                                value={option}
+                                label={<Text style={styles.radio}>{option}</Text>}
+                            />
+                        )
+                    })}
                 </RadioButtonGroup>
+                {others.includes(current) === true &&
+                    <TextInput
+                        multiline={true}
+                        style={[styles.input, styles.textarea]}
+                        onChangeText={text => {
+                            if (text.trim() === '') {
+                                text = null
+                            }
+                            setOther(text)
+                            props.listen([current, text], props.index, props.data.type)
+                        }}
+                        autoCorrect={false}
+                    />
+                }
             </View>
         </View>
     )
@@ -153,10 +218,7 @@ function ListBlock(props) {
                 <Text
                     style={styles.fakeInput}
                 >
-                    {(typeof option === 'number')
-                        ? props.data.options[option]
-                        : option
-                    }
+                    {option}
                 </Text>
                 <Picker
                     style={styles.picker}
@@ -171,7 +233,7 @@ function ListBlock(props) {
                     <Picker.Item enabled={false} label="Select an option" value="none" />
                     {props.data.options.map((option, i) => {
                         return(
-                            <Picker.Item key={i} label={option} value={i} />
+                            <Picker.Item key={i} label={option} value={option} />
                         )
                     })}
                 </Picker>
@@ -370,5 +432,8 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignSelf: 'center',
         marginLeft: 10
+    },
+    checkboxOther: {
+        marginTop: 10
     }
 })

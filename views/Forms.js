@@ -209,7 +209,7 @@ export default class Forms extends React.Component {
     rowListener = (data, i) => {
         let form = this.state.form
         if (form !== null) {
-            console.log(data, form.main.content[i])
+            //console.log(data, form.main.content[i])
         }
     }
 
