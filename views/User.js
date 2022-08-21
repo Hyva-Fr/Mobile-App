@@ -88,6 +88,7 @@ export default class User extends React.Component {
         this.state.online()
         getData('init', (data) => {
             XHR('post', '/profile/get-avatar/' + this.state.user.id, {}, (resp) => {
+                console.log(resp)
                 let avatar = (resp.data === null || resp.data === '') ? Avatar["default-avatar"] : resp.data
                 this.setState({avatar: avatar})
             }, data.token)

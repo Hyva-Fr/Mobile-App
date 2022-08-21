@@ -44,7 +44,9 @@ export default class Forms extends React.Component {
             selectedMission: null,
             countError: false,
             validated: false,
-            xhrError: false
+            xhrError: false,
+            images: {},
+            sent: false
         }
     }
 
@@ -135,9 +137,9 @@ export default class Forms extends React.Component {
                         </View>
                     }
                     {this.state.xhrError === true &&
-                    <View style={styles.validation}>
-                        <Text style={styles.xhrError}>Something went wrong. Please try again.</Text>
-                    </View>
+                        <View style={styles.validation}>
+                            <Text style={styles.xhrError}>Something went wrong. Please try again.</Text>
+                        </View>
                     }
                     <View style={styles.modalTitleContainer}>
                         <Pen style={styles.svg} fill={Css().root.yellow}/>
@@ -239,10 +241,16 @@ export default class Forms extends React.Component {
         )
     }
 
-    rowListener = (data, i) => {
+    rowListener = (data, i, type) => {
         let form = this.state.form,
-            toValidate = this.state.toValidationForm
+            toValidate = this.state.toValidationForm,
+            images = this.state.images
         if (form !== null) {
+            if (type === 'file') {
+                let imgs = images
+                imgs['block' + i] = data
+                this.setState({images: imgs})
+            }
             toValidate.content[i].response = data
             this.setState({'toValidationForm': toValidate})
         }
@@ -272,29 +280,13 @@ export default class Forms extends React.Component {
                             'form': JSON.stringify(toValidate.form),
                             'mission_id': toValidate.mission_id,
                             'mission': JSON.stringify(toValidate.mission),
-                            'content': JSON.stringify(toValidate.content)
+                            'content': JSON.stringify(toValidate.content),
+                            'images': JSON.stringify(this.state.images)
                         }
                         getData('init', (json) => {
                             XHR('post', '/validates', toXHR, (resp) => {
                                 if (resp.message && resp.message === 'ok') {
-                                    this.setState({xhrError: false, validated: true})
-                                    setTimeout(() => {
-                                        this.setState({
-                                            form: null,
-                                            formName: null,
-                                            signature: null,
-                                            signatureError: false,
-                                            signatureValidate: false,
-                                            toValidationForm: null,
-                                            missionToString: null,
-                                            missionExist: true,
-                                            selectedMissionSerial: null,
-                                            selectedMission: null,
-                                            countError: false,
-                                            validated: false,
-                                            xhrError: false
-                                        })
-                                    }, 3000)
+                                    this.restore()
                                 } else {
                                     setTimeout(() => {
                                         this.setState({xhrError: true})
@@ -303,7 +295,7 @@ export default class Forms extends React.Component {
                                         this.setState({xhrError: false})
                                     }, 10000)
                                 }
-                            }, json.token)
+                            }, json.token, this.state.images)
                         })
                     }
                 } else {
@@ -313,6 +305,28 @@ export default class Forms extends React.Component {
                 this.setState({missionExist: false})
             }
         }
+    }
+
+    restore = () => {
+        this.setState({xhrError: false, validated: true})
+        setTimeout(() => {
+            this.setState({
+                form: null,
+                formName: null,
+                signature: null,
+                signatureError: false,
+                signatureValidate: false,
+                toValidationForm: null,
+                missionToString: null,
+                missionExist: true,
+                selectedMissionSerial: null,
+                selectedMission: null,
+                countError: false,
+                validated: false,
+                xhrError: false,
+                sent: false
+            })
+        }, 3000)
     }
 
     counter = (objects, mode) => {

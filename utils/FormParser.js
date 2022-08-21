@@ -152,7 +152,7 @@ function MultiChoices(props) {
 
 function NumberBlock(props) {
 
-    let [number, setNumber] = useState('0'),
+    let [number, setNumber] = useState(null),
         allowed = ['0','1','2','3','4','5','6','7','8','9','.'];
     const inputRef = createRef();
 
@@ -354,14 +354,9 @@ function ImageBlock(props) {
         });
 
         if (!result.cancelled) {
-            let split = result.uri.split('.'),
-                ext = split[split.length-1],
-                base64 = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' });
-            if (allowed.includes(ext)) {
-                images.push('data:image/' + ext + ';base64,' +  base64);
-                setImages([...images])
-                props.listen(images, props.index, props.data.type)
-            }
+            images.push(result.uri);
+            setImages([...images])
+            props.listen(images, props.index, props.data.type)
         } else {
             console.log('Failed to upload image')
         }
@@ -438,12 +433,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderStyle: 'solid',
         borderBottomColor: Css().root.thinGrey
-    },
-    multiChoices: {
-
-    },
-    numberBlock: {
-
     },
     unit: {
         fontFamily: 'Lato-LightItalic',
@@ -548,13 +537,13 @@ const styles = StyleSheet.create({
         width: (screenWidth - 50)/2,
         height: (screenWidth - 50)/2,
         borderRadius: 6,
+        marginBottom: 10
     },
     image: {
         resizeMode: 'cover',
         width: '100%',
         height: '100%',
         borderRadius: 6,
-        marginBottom: 10
     },
     required: {
         color: Css().root.red,
