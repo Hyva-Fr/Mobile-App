@@ -37,6 +37,7 @@
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-native": "0.64.3",
+    "react-native-debounce-input": "^1.0.5",
     "react-native-gesture-handler": "^2.1.0",
     "react-native-loading-placeholder": "^0.0.6",
     "react-native-pager-view": "^5.4.9",

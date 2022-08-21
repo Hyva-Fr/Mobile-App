@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, createRef} from "react";
 import {View, Text, StyleSheet, TextInput, Pressable, Image, Dimensions} from "react-native";
 import Css from "./CSS";
 import {Picker} from '@react-native-picker/picker';
@@ -9,12 +9,11 @@ import * as FileSystem from 'expo-file-system';
 import XHR from "./XHR";
 import Button from "../components/ui-kit/Button";
 import Close from "../components/svg/Close";
+import DelayInput from "react-native-debounce-input";
 
 const screenWidth = Dimensions.get('window').width
 
 export default function FormParser(props) {
-
-    //console.log(props.data)
 
     switch(props.data.title) {
         case 'Start section':
@@ -44,9 +43,15 @@ export default function FormParser(props) {
     }
 }
 
+function Required() {
+    return (
+        <Text style={styles.required}> *</Text>
+    )
+}
+
 function StartSection(props) {
     return(
-        <View style={[styles.startSection, styles.common]}>
+        <View style={[styles.common]}>
             <Text style={styles.startLabel}>{props.data.label}</Text>
         </View>
     )
@@ -107,8 +112,11 @@ function MultiChoices(props) {
     }
 
     return(
-        <View style={[styles.multiChoices, styles.common]}>
-            <Text style={styles.label}>{props.data.label}</Text>
+        <View style={[styles.common]}>
+            <Text style={styles.label}>
+                {props.data.label}
+                <Required />
+            </Text>
             <View style={styles.checkBoxContainer}>
                 {options.map((option, i) => {
                     let sel = selected.check[i] && selected.check[i] === option
@@ -123,7 +131,7 @@ function MultiChoices(props) {
                                 color={sel ? Css().root.yellow : undefined}
                             />
                             <Text style={styles.text}>
-                                {option}
+                                {others.includes(option) ? 'Other' : option}
                             </Text>
                         </Pressable>
                     )
@@ -143,18 +151,42 @@ function MultiChoices(props) {
 }
 
 function NumberBlock(props) {
+
+    let [number, setNumber] = useState('0'),
+        allowed = ['0','1','2','3','4','5','6','7','8','9','.'];
+    const inputRef = createRef();
+
+    const checkFormat = (text) => {
+
+        let newText = ''
+        for (let i = 0; i < text.length; i++) {
+            if (i === 0 && text[i] === '-') {
+                newText += text[i]
+            }
+            if (allowed.includes(text[i]) === true) {
+                newText += text[i]
+            }
+        }
+        props.listen(newText, props.index, props.data.type)
+        setNumber(newText)
+    }
+
     return(
-        <View style={[styles.numberBlock, styles.common]}>
+        <View style={[styles.common]}>
             <Text style={styles.label}>{props.data.label}
                 {(props.data.unit && props.data.unit !== '') &&
                     <Text style={styles.unit}> ({props.data.unit})</Text>
                 }
+                <Required />
             </Text>
             <TextInput
+                ref={inputRef}
                 style={styles.input}
-                onChangeText={text => props.listen(text, props.index, props.data.type)}
+                onChangeText={nb => checkFormat(nb)}
                 autoCorrect={false}
-                keyboardType='decimal-pad'
+                numeric
+                keyboardType='numeric'
+                value={number}
             />
         </View>
     )
@@ -168,8 +200,11 @@ function SingleChoice(props) {
 
 
     return(
-        <View style={[styles.singleChoice, styles.common]}>
-            <Text style={styles.label}>{props.data.label}</Text>
+        <View style={[styles.common]}>
+            <Text style={styles.label}>
+                {props.data.label}
+                <Required />
+            </Text>
             <View>
                 <RadioButtonGroup
                     containerStyle={{ marginBottom: 10 }}
@@ -189,7 +224,7 @@ function SingleChoice(props) {
                                 key={i}
                                 style={styles.radioItem}
                                 value={option}
-                                label={<Text style={styles.radio}>{option}</Text>}
+                                label={<Text style={styles.radio}>{others.includes(option) ? 'Other' : option}</Text>}
                             />
                         )
                     })}
@@ -216,8 +251,11 @@ function SingleChoice(props) {
 function ListBlock(props) {
     let [option, setOption] = useState('Select an option')
     return(
-        <View style={[styles.listBlock, styles.common]}>
-            <Text style={styles.label}>{props.data.label}</Text>
+        <View style={[styles.common]}>
+            <Text style={styles.label}>
+                {props.data.label}
+                <Required />
+            </Text>
             <View>
                 <Text
                     style={styles.fakeInput}
@@ -248,8 +286,11 @@ function ListBlock(props) {
 
 function OneLineBlock(props) {
     return(
-        <View style={[styles.oneLineBlock, styles.common]}>
-            <Text style={styles.label}>{props.data.label}</Text>
+        <View style={[styles.common]}>
+            <Text style={styles.label}>
+                {props.data.label}
+                <Required />
+            </Text>
             <TextInput
                 style={styles.input}
                 onChangeText={text => props.listen(text, props.index, props.data.type)}
@@ -261,8 +302,11 @@ function OneLineBlock(props) {
 
 function TextBlock(props) {
     return(
-        <View style={[styles.textBlock, styles.common]}>
-            <Text style={styles.label}>{props.data.label}</Text>
+        <View style={[styles.common]}>
+            <Text style={styles.label}>
+                {props.data.label}
+                <Required />
+            </Text>
             <TextInput
                 multiline={true}
                 style={[styles.input, styles.textarea]}
@@ -275,7 +319,7 @@ function TextBlock(props) {
 
 function CommentsBlock(props) {
     return(
-        <View style={[styles.commentsBlock, styles.common]}>
+        <View style={[styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
             <TextInput
                 multiline={true}
@@ -289,7 +333,7 @@ function CommentsBlock(props) {
 
 function OptionsBlock(props) {
     return(
-        <View style={[styles.optionsBlock, styles.common]}>
+        <View style={[styles.common]}>
             <Text style={styles.options}>{props.data.content}</Text>
         </View>
     )
@@ -315,7 +359,6 @@ function ImageBlock(props) {
                 base64 = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' });
             if (allowed.includes(ext)) {
                 images.push('data:image/' + ext + ';base64,' +  base64);
-                console.log(images)
                 setImages([...images])
                 props.listen(images, props.index, props.data.type)
             }
@@ -331,7 +374,7 @@ function ImageBlock(props) {
     }
 
     return(
-        <View style={[styles.imageBlock, styles.common]}>
+        <View style={[styles.common]}>
             <Text style={styles.label}>{props.data.label}</Text>
             {(images.length > 0)
                 ? <View style={styles.imagesContainer}>
@@ -382,9 +425,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: Css().root.lightGrey
     },
-    startSection: {
-
-    },
     startLabel: {
         fontFamily: 'Lato-Bold',
         fontSize: 16,
@@ -410,27 +450,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: Css().root.thinGrey,
         fontStyle: 'italic'
-    },
-    singleChoice: {
-
-    },
-    listBlock: {
-
-    },
-    oneLineBlock: {
-
-    },
-    textBlock: {
-
-    },
-    commentsBlock: {
-
-    },
-    optionsBlock: {
-
-    },
-    imageBlock: {
-
     },
     input: {
         width: '100%',
@@ -536,5 +555,10 @@ const styles = StyleSheet.create({
         height: '100%',
         borderRadius: 6,
         marginBottom: 10
+    },
+    required: {
+        color: Css().root.red,
+        fontFamily: 'Lato-Light',
+        fontSize: 16
     }
 })

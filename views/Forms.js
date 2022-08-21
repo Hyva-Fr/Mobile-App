@@ -43,7 +43,8 @@ export default class Forms extends React.Component {
             selectedMissionSerial: null,
             selectedMission: null,
             countError: false,
-            validated: false
+            validated: false,
+            xhrError: false
         }
     }
 
@@ -133,6 +134,11 @@ export default class Forms extends React.Component {
                             <Text style={styles.validationText}>Form validated</Text>
                         </View>
                     }
+                    {this.state.xhrError === true &&
+                    <View style={styles.validation}>
+                        <Text style={styles.xhrError}>Something went wrong. Please try again.</Text>
+                    </View>
+                    }
                     <View style={styles.modalTitleContainer}>
                         <Pen style={styles.svg} fill={Css().root.yellow}/>
                         <Text style={styles.title}>{this.state.formName}</Text>
@@ -160,7 +166,10 @@ export default class Forms extends React.Component {
                             {this.state.missionExist === false &&
                                 <Text style={styles.signatureError}>This mission does not exist.</Text>
                             }
-                            <Text style={styles.label}>Search by serial or select a mission in list</Text>
+                            <Text style={styles.label}>
+                                Search by serial or select a mission in list
+                                <Text style={styles.required}> *</Text>
+                            </Text>
                             <View>
                                 <TextInput
                                     style={styles.input}
@@ -194,7 +203,10 @@ export default class Forms extends React.Component {
                         {this.state.signatureError === true &&
                             <Text style={styles.signatureError}>You must save your signature before validate the form.</Text>
                         }
-                        <Text style={styles.label}>Signature</Text>
+                        <Text style={styles.label}>
+                            Signature
+                            <Text style={styles.required}> *</Text>
+                        </Text>
                         <View style={{height: 350, width: '100%'}}>
                             {this.state.signatureValidate === true &&
                                 <Check style={styles.check} fill={Css().root.green}/>
@@ -247,31 +259,52 @@ export default class Forms extends React.Component {
                     form.signature = signature
                     let countChecker = this.counter(form.main.content, 'form')
                     let countValidate = this.counter(toValidate.content, 'validate')
-                    console.log(countChecker)
                     if (countValidate < countChecker) {
                         this.setState({countError: true})
                     } else {
                         this.setState({countError: false})
                         toValidate['mission_id'] = this.state.selectedMission.id
-                        toValidate['missions'] = this.state.selectedMission
-                        this.setState({validated: true})
-                        setTimeout(() => {
-                            console.log(toValidate)
-                            this.setState({
-                                form: null,
-                                formName: null,
-                                signature: null,
-                                signatureError: false,
-                                signatureValidate: false,
-                                toValidationForm: null,
-                                missionToString: null,
-                                missionExist: true,
-                                selectedMissionSerial: null,
-                                selectedMission: null,
-                                countError: false,
-                                validated: false
-                            })
-                        }, 3000)
+                        toValidate['mission'] = this.state.selectedMission
+                        let toXHR = {
+                            'agency_id': toValidate.agency_id,
+                            'user_id': toValidate.user_id,
+                            'form_id': toValidate.form_id,
+                            'form': JSON.stringify(toValidate.form),
+                            'mission_id': toValidate.mission_id,
+                            'mission': JSON.stringify(toValidate.mission),
+                            'content': JSON.stringify(toValidate.content)
+                        }
+                        getData('init', (json) => {
+                            XHR('post', '/validates', toXHR, (resp) => {
+                                if (resp.message && resp.message === 'ok') {
+                                    this.setState({xhrError: false, validated: true})
+                                    setTimeout(() => {
+                                        this.setState({
+                                            form: null,
+                                            formName: null,
+                                            signature: null,
+                                            signatureError: false,
+                                            signatureValidate: false,
+                                            toValidationForm: null,
+                                            missionToString: null,
+                                            missionExist: true,
+                                            selectedMissionSerial: null,
+                                            selectedMission: null,
+                                            countError: false,
+                                            validated: false,
+                                            xhrError: false
+                                        })
+                                    }, 3000)
+                                } else {
+                                    setTimeout(() => {
+                                        this.setState({xhrError: true})
+                                    }, 7000)
+                                    setTimeout(() => {
+                                        this.setState({xhrError: false})
+                                    }, 10000)
+                                }
+                            }, json.token)
+                        })
                     }
                 } else {
                     this.setState({signatureError: true})
@@ -607,6 +640,18 @@ const styles = StyleSheet.create({
     validationText: {
         padding: 10,
         backgroundColor: Css().root.green,
+        color: Css().root.white,
+        fontFamily: 'Lato-Bold',
+        borderRadius: 6
+    },
+    required: {
+        color: Css().root.red,
+        fontFamily: 'Lato-Light',
+        fontSize: 16
+    },
+    xhrError: {
+        padding: 10,
+        backgroundColor: Css().root.red,
         color: Css().root.white,
         fontFamily: 'Lato-Bold',
         borderRadius: 6

@@ -28,6 +28,7 @@ export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.notifInterval = null
+        this.isOnlineInterval = null
         this.state = {
             isOnline: false,
             visible: false,
@@ -88,6 +89,7 @@ export default class App extends React.Component {
 
     componentDidMount() {
         //removeData('init')
+        clearInterval(this.isOnlineInterval)
         this.loadFonts()
         this.isOnlineChecker()
         getData('init', (data) => {
@@ -102,10 +104,15 @@ export default class App extends React.Component {
                 this.setState({notifsSettings: data})
             }
         })
+
+        this.isOnlineInterval = setInterval(() => {
+            this.isOnlineChecker()
+        }, 3000)
     }
 
     componentWillUnmount(){
         if(this.notifInterval) clearInterval(this.notifInterval)
+        if(this.isOnlineInterval) clearInterval(this.isOnlineInterval)
     }
 
     goBack = (stack) => {
